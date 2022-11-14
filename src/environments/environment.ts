@@ -3,6 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
+  useEmulators: false,
   firebase: {
     projectId: 'kanb-list',
     appId: '1:61602475569:web:b2d27104d03c0ab44f2f10',

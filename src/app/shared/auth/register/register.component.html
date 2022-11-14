@@ -1,0 +1,51 @@
+<div class="d-inline-block">
+  <form [formGroup]="registerForm" action="Register" (ngSubmit)="registerSubmit()">
+    <p class="text-center fs-2 fw-semibold">Register</p>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" formControlName="displayName" id="floatingName"
+        placeholder="Francisco Ramos">
+      <label for="floatingName">Your name</label>
+      <div>
+        <ng-container *ngIf="displayName.dirty || displayName.touched">
+          <small class="text-danger" *ngIf="!displayName.value">Name is required</small>
+          <small class="text-danger" *ngIf="displayName.value && displayName.invalid">Provide a name longer than 6
+            characters</small>
+        </ng-container>
+      </div>
+    </div>
+    <div class="form-floating mb-3">
+      <input type="email" class="form-control" formControlName="email" id="floatingEmail"
+        placeholder="something@example.com">
+      <label for="floatingEmail">Email address</label>
+      <div>
+        <ng-container *ngIf="email.dirty || email.touched">
+          <small class="text-danger" *ngIf="!email.value">Email is required</small>
+          <small class="text-danger" *ngIf="email.value && email.invalid">Email is invalid</small>
+        </ng-container>
+      </div>
+    </div>
+    <div class="form-floating">
+      <input type="password" class="form-control" formControlName="password" id="floatingPassword"
+        placeholder="Password">
+      <label for="floatingPassword">Password</label>
+      <div>
+        <ng-container *ngIf="password.dirty || password.touched">
+          <small class="text-danger" *ngIf="!password.value">Password is required</small>
+          <small class="text-danger" *ngIf="password.value && password.invalid">A correct password has at least 6
+            characters</small>
+        </ng-container>
+      </div>
+      <a routerLink="../login">Already a user? Log in</a>
+    </div>
+    <div class="d-flex mt-3">
+      <button type="submit" class="btn btn-success">Submit</button>
+    </div>
+  </form>
+  <p class="text-center mt-2 fw-semibold text-secondary">Or</p>
+  <div class="d-flex">
+    <button type="button" class="btn btn-outline-success" (click)="authService.loginWithGoogle()">
+      <i class="bi bi-google"></i>
+      <span class="ms-1">Log in with Google</span>
+    </button>
+  </div>
+</div>

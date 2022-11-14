@@ -1,0 +1,33 @@
+<ng-container *ngIf="(managementService.loaded$ | async); else loading">
+  <ng-container *ngIf="userData; else login">
+    <div class="dropdown d-flex">
+      <p class="text-white bold my-auto me-1">{{userData.claims?.name}}</p>
+      <button class="btn userPfp" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <img [src]="userData.claims?.picture || './../../../assets/nouser.svg'" referrerpolicy="no-referrer"
+          alt="user profile picture">
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end mt-2">
+        <li><a class="dropdown-item" routerLink="/profile">Profile</a></li>
+        <li>
+          <hr class="dropdown-divider">
+        </li>
+        <li><a class="btn btn btn-danger dropdown-item" (click)="authService.logout()">Log Out</a></li>
+      </ul>
+    </div>
+  </ng-container>
+
+  <ng-template #login>
+    <button type="button" class="btn btn-success" routerLink="/auth/login">
+      <i class="bi bi-box-arrow-in-right"></i>
+      <span class="ms-1">Log In</span>
+    </button>
+  </ng-template>
+
+
+</ng-container>
+
+<ng-template #loading>
+  <div class="placeholder-glow">
+    <span class="userPfp placeholder bg-light"></span>
+  </div>
+</ng-template>

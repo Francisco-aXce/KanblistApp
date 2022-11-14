@@ -1,0 +1,20 @@
+<ng-container *ngIf="(managementService.loaded$ | async) && userData; else loading">
+  <div class="d-flex">
+    <img class="userPfpPublic me-3" [src]="userData.user.photoURL || './../../../assets/nouser.svg'"
+      referrerpolicy="no-referrer" alt="user profile picture">
+    <div>
+      <p class="text-color-1 bold my-auto username me-4">{{userData.user.displayName}}</p>
+      <p class="text-color-2 my-auto useremail">{{userData.user.email}}</p>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #loading>
+  <div class="placeholder-glow d-flex">
+    <span class="userPfpPublic placeholder me-3"></span>
+    <div class="d-flex flex-column">
+      <span class="placeholder my-auto" style="height: 1.4rem; width: 14rem;"></span>
+      <span class="placeholder my-auto" style="height: 0.5rem; width: 10rem;"></span>
+    </div>
+  </div>
+</ng-template>

@@ -1,0 +1,11 @@
+<nav class="navbar navbar-expand-lg bg-main shadow-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand ms-3" routerLink="/">
+      <img src="./../../../assets/app-logo.svg" alt="app logo">
+    </a>
+    <div class="me-3">
+      <!-- TODO: user miniprofile and login button are separated components -->
+      <app-private-profile [userData]="authService.userInfo$ | async"></app-private-profile>
+    </div>
+  </div>
+</nav>

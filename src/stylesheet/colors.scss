@@ -1,0 +1,25 @@
+@import "./variables.scss";
+
+.bg-main {
+  background-color: $main-color;
+}
+
+.bg-other {
+  background-color: $darkest-white;
+}
+.bg-default {
+  background-color: $main-card-color;
+}
+
+//-----------------Text----------------
+.text-color-1 {
+  color: $main-color-txt;
+}
+
+.text-color-2 {
+  color: $secondary-color-txt;
+}
+
+.bold {
+  font-weight: 700;
+}

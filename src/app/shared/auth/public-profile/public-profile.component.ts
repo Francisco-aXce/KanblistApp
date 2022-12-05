@@ -8,7 +8,10 @@ import { ManagementService } from 'src/app/services/management.service';
 })
 export class PublicProfileComponent implements OnInit {
 
-  @Input() userData: any;
+  @Input() showName: boolean = true;
+  @Input() userName: string | undefined;
+  @Input() profilePic: string | undefined;
+  @Input() size: 'xs' | 'sm' | 'md' | 'lg' = 'md';
 
   constructor(
     public managementService: ManagementService,

@@ -12,6 +12,9 @@ import { NavbarComponent } from './global/navbar/navbar.component';
 import { LoginComponent } from './auth/login/login.component';
 import { ProjectCardComponent } from './project/project-card/project-card.component';
 import { RegisterComponent } from './auth/register/register.component';
+import { ProjectsDropdownComponent } from './project/projects-dropdown/projects-dropdown.component';
+import { ProjectHeaderComponent } from './project/project-header/project-header.component';
+import { BoardComponent } from './project/board/board.component';
 
 
 @NgModule({
@@ -25,6 +28,9 @@ import { RegisterComponent } from './auth/register/register.component';
     LoginComponent,
     RegisterComponent,
     ProjectCardComponent,
+    ProjectsDropdownComponent,
+    ProjectHeaderComponent,
+    BoardComponent,
   ],
   imports: [
     CommonModule,
@@ -39,6 +45,9 @@ import { RegisterComponent } from './auth/register/register.component';
     RegisterComponent,
     ProjectCardComponent,
     NavbarComponent,
+    ProjectsDropdownComponent,
+    ProjectHeaderComponent,
+    BoardComponent,
   ]
 })
 export class SharedModule { }

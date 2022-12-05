@@ -1,20 +1,21 @@
-<ng-container *ngIf="(managementService.loaded$ | async) && userData; else loading">
-  <div class="d-flex">
-    <img class="userPfpPublic me-3" [src]="userData.user.photoURL || './../../../assets/nouser.svg'"
-      referrerpolicy="no-referrer" alt="user profile picture">
-    <div>
-      <p class="text-color-1 bold my-auto username me-4">{{userData.user.displayName}}</p>
-      <p class="text-color-2 my-auto useremail">{{userData.user.email}}</p>
+<ng-container *ngIf="(userName || !showName) && profilePic; else loading">
+  <div class="wrapper d-flex w-100" [ngClass]="size">
+    <img class="userPfp shadow-sm" [ngClass]="size" [src]="profilePic || ''" referrerpolicy="no-referrer"
+      alt="user photo" onerror="this.onerror=null;this.src='./../../../assets/nouser.svg';">
+    <div *ngIf="showName" class="my-auto overflow-hidden"
+      [ngClass]="{'ms-1': size[0] === 'x', 'ms-2': size[0] !== 'x'}">
+      <p class="text-color-1 fw-bold userName text-center m-0" [ngClass]="size">{{userName}}</p>
+      <!-- <p class="text-color-2 my-auto useremail">{{userData.user.email}}</p> -->
     </div>
   </div>
 </ng-container>
 
 <ng-template #loading>
   <div class="placeholder-glow d-flex">
-    <span class="userPfpPublic placeholder me-3"></span>
+    <span class="placeholder me-3"></span>
     <div class="d-flex flex-column">
-      <span class="placeholder my-auto" style="height: 1.4rem; width: 14rem;"></span>
-      <span class="placeholder my-auto" style="height: 0.5rem; width: 10rem;"></span>
+      <span class="placeholder my-auto"></span>
+      <!-- <span class="placeholder my-auto" style="height: 0.5rem; width: 10rem;"></span> -->
     </div>
   </div>
 </ng-template>

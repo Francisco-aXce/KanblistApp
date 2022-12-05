@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LayoutComponent } from 'src/app/shared/global/layout/layout.component';
 import { PlatformPageComponent } from './platform.page/platform.page.component';
+import { ProjectPageComponent } from './project.page/project.page.component';
 
 const routes: Routes = [
   {
@@ -10,7 +11,11 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: PlatformPageComponent
+        component: PlatformPageComponent,
+      },
+      {
+        path: ':projectId',
+        component: ProjectPageComponent,
       }
     ]
   }

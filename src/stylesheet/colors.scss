@@ -1,13 +1,15 @@
 @import "./variables.scss";
 
-.bg-main {
+.bg-main-custom {
   background-color: $main-color;
 }
-
-.bg-other {
+.bg-secondary-custom {
+  background-color: $secondary-color;
+}
+.bg-other-custom {
   background-color: $darkest-white;
 }
-.bg-default {
+.bg-default-custom {
   background-color: $main-card-color;
 }
 

@@ -1,0 +1,52 @@
+.wrapper {
+  &.xs {
+    max-width: 150px;
+  }
+  &.sm {
+    max-width: 300px;
+  }
+  &.md {
+    max-width: 450px;
+  }
+  &.lg {
+    max-width: 600px;
+  }
+}
+
+.userPfp {
+  border-radius: 50%;
+  &.xs {
+    width: 30px;
+    height: 30px;
+  }
+  &.sm {
+    width: 40px;
+    height: 40px;
+  }
+  &.md {
+    width: 100px;
+    height: 100px;
+  }
+  &.lg {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+.userName {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  &.xs {
+    font-size: 0.8rem;
+  }
+  &.sm {
+    font-size: 1rem;
+  }
+  &.md {
+    font-size: 1.2rem;
+  }
+  &.lg {
+    font-size: 1.4rem;
+  }
+}

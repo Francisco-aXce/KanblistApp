@@ -1,0 +1,26 @@
+header {
+  z-index: 999;
+  padding-top: 60px;
+}
+
+.divider {
+  margin-top: 1px;
+  margin-bottom: 1px;
+  width: 4px;
+  min-width: 4px;
+  max-width: 4px;
+}
+
+.divider-xs {
+  margin: 0 1px;
+  height: 4px;
+  min-height: 4px;
+  min-height: 4px;
+}
+
+.users-shared {
+  display: flex;
+  > *:not(:first-child) {
+    margin-left: -10px;
+  }
+}

@@ -16,15 +16,17 @@ const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () => import('./pages/auth/auth.module').then(m => m.AuthModule),
+    canActivate: [AuthGuard], data: { authGuardPipe: redirectLoggedInToHome }
   },
   {
     path: 'profile',
     loadChildren: () => import('./pages/profile/profile.module').then(m => m.ProfileModule),
+    canActivate: [AuthGuard], data: { authGuardPipe: redirectUnautorizedToLanding }
   },
   {
     path: 'platform',
     loadChildren: () => import('./pages/platform/platform.module').then(m => m.PlatformModule),
-    // canActivate: [AuthGuard], data: { authGuardPipe: redirectUnautorizedToLanding },
+    canActivate: [AuthGuard], data: { authGuardPipe: redirectUnautorizedToLanding },
   },
   {
     path: '**',

@@ -1,37 +1,9 @@
 <div class="container my-5">
   <section class="mb-5">
-    <!-- TODO: Divide this in component -->
-    <button class="btn btn-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#yourProjects"
-      aria-expanded="false" aria-controls="yourProjects">
-      <h4>Your projects</h4>
-      <i class="bi bi-caret-down-fill"></i>
-    </button>
-    <div class="collapse multi-collapse show" id="yourProjects">
-      <div class="card card-body">
-        <div class="container">
-          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
-            <app-project-card></app-project-card>
-          </div>
-        </div>
-      </div>
-    </div>
+    <app-projects-dropdown [sectionName]="'Your projects'"></app-projects-dropdown>
   </section>
 
   <section class="mb-5">
-    <!-- TODO: Divide this in component -->
-    <button class="btn btn-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#sharedProjects"
-      aria-expanded="false" aria-controls="sharedProjects">
-      <h4>Shared projects</h4>
-      <i class="bi bi-caret-down-fill"></i>
-    </button>
-    <div class="collapse multi-collapse show" id="sharedProjects">
-      <div class="card card-body">
-        <div class="container">
-          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
-            <app-project-card></app-project-card>
-          </div>
-        </div>
-      </div>
-    </div>
+    <app-projects-dropdown [sectionName]="'Shared projects'"></app-projects-dropdown>
   </section>
 </div>

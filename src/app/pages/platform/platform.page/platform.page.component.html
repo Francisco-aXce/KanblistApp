@@ -1,9 +1,33 @@
-<div class="container my-5">
-  <section class="mb-5">
-    <app-projects-dropdown [sectionName]="'Your projects'"></app-projects-dropdown>
+<div class="container pt-10">
+
+  <section>
+    <app-projects-section [canAdd]="true" [projects]="[1,2,4,5,6]" [icon]="'bi bi-person-fill'"
+      [sectionName]="'Your projects'"></app-projects-section>
   </section>
 
-  <section class="mb-5">
-    <app-projects-dropdown [sectionName]="'Shared projects'"></app-projects-dropdown>
+  <section>
+    <app-projects-section [projects]="[]" [icon]="'bi bi-people-fill'"
+      [sectionName]="'Shared projects'"></app-projects-section>
   </section>
+
+</div>
+
+<!-- Modal add project -->
+<div class="modal fade" id="addProject" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="addProjectLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="addProjectLabel">Add project</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
 </div>

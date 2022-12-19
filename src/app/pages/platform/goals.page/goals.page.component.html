@@ -1,0 +1,95 @@
+<app-project-header></app-project-header>
+
+<div class="container container-goals">
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between">
+      <div>
+        <i class="bi bi-flag-fill h4"></i>
+        Project's goals
+      </div>
+      <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addEditGoal"><i
+          class="bi bi-plus-lg"></i></button>
+    </div>
+    <div class="card-body">
+      <ng-container *ngIf="true; else noContent">
+        <div class="accordion">
+          <div class="accordion-item" *ngFor="let goal of [1,2,3,4,5]; index as i">
+            <h2 class="accordion-header" [attr.id]="'heading'">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                [attr.data-bs-target]="'#'+'coll'+i" [attr.aria-controls]="'coll'+i">
+                Accordion Item #1
+              </button>
+            </h2>
+            <div [attr.id]="'coll'+i" class="accordion-collapse collapse" [attr.aria-labelledby]="'heading'">
+              <div class="accordion-body">
+                <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse
+                plugin
+                adds
+                the appropriate classes that we use to style each element. These classes control the overall appearance,
+                as
+                well
+                as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding
+                our
+                default variables. It's also worth noting that just about any HTML can go within the
+                <code>.accordion-body</code>, though the transition does limit overflow.
+                <div class="mt-3">
+                  <button class="btn btn-primary" [routerLink]="['goalId']"><i
+                      class="bi bi-box-arrow-in-right me-1"></i>Open</button>
+                  <button class="btn btn-secondary ms-2" data-bs-toggle="modal" data-bs-target="#addEditGoal">
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #noContent>
+        <span>No goals defined</span>
+      </ng-template>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal edit project -->
+<div class="modal fade" id="editProject" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="editProjectLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editProjectLabel">Edit project</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal add/edit goal -->
+<div class="modal fade" id="addEditGoal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="addEditGoalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="addEditGoalLabel">Add edit goal</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,6 +6,9 @@
 .bg-secondary-custom {
   background-color: $secondary-color;
 }
+.bg-secondary-custom-1 {
+  background-color: $secondary-color-1;
+}
 .bg-other-custom {
   background-color: $darkest-white;
 }
@@ -22,6 +25,7 @@
   color: $secondary-color-txt;
 }
 
-.bold {
-  font-weight: 700;
+//-----------------Card----------------
+.card-color-blue-1 {
+  background-color: $main-card-color;
 }

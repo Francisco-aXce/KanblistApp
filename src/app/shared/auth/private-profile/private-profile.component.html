@@ -1,7 +1,7 @@
 <ng-container *ngIf="(managementService.loaded$ | async); else loading">
   <ng-container *ngIf="userData; else login">
     <div class="dropdown d-flex">
-      <p class="text-white bold my-auto me-1">{{userData.claims?.name}}</p>
+      <p class="text-white fw-bold my-auto me-1">{{userData.claims?.name}}</p>
       <button class="btn userPfp" type="button" data-bs-toggle="dropdown" aria-expanded="false">
         <img [src]="userData.claims?.picture || './../../../assets/nouser.svg'" referrerpolicy="no-referrer"
           alt="user profile picture">

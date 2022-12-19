@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LayoutComponent } from 'src/app/shared/global/layout/layout.component';
+import { GoalsPageComponent } from './goals.page/goals.page.component';
 import { PlatformPageComponent } from './platform.page/platform.page.component';
-import { ProjectPageComponent } from './project.page/project.page.component';
+import { GoalPageComponent } from './goal.page/goal.page.component';
 
 const routes: Routes = [
   {
@@ -15,7 +16,11 @@ const routes: Routes = [
       },
       {
         path: ':projectId',
-        component: ProjectPageComponent,
+        component: GoalsPageComponent,
+      },
+      {
+        path: ':projectId/:goalId',
+        component: GoalPageComponent,
       }
     ]
   }

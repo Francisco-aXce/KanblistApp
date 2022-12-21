@@ -12,7 +12,7 @@
       <ng-container *ngIf="projects.length; else noContent">
         <ng-container *ngFor="let project of projects">
           <div class="col">
-            <app-project-card></app-project-card>
+            <app-project-card [project]="project"></app-project-card>
           </div>
         </ng-container>
       </ng-container>

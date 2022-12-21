@@ -5,18 +5,23 @@ import { ManagementService, Constants } from './management.service';
 import { ToastrService } from 'ngx-toastr';
 import {
   signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider, createUserWithEmailAndPassword, updateProfile,
-  Auth, user, signOut, getIdTokenResult, updateCurrentUser
+  Auth, user, signOut, getIdTokenResult,
 } from '@angular/fire/auth';
+import { UserData } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  // TODO: Add Data model
-  readonly userInfo$: Observable<any> = user(this.auth).pipe(
+  readonly userInfo$: Observable<UserData | null> = user(this.auth).pipe(
     switchMap(user => user ? from(getIdTokenResult(user, true)) : of(null)),
-    map(tokenRes => tokenRes ? ({ claims: tokenRes.claims }) : null),
+    map(tokenRes =>
+      tokenRes ? (
+        {
+          claims: tokenRes.claims
+        }
+      ) : null),
     tap((data) => {
       this.managementService.loaded = true;
       this.managementService.log('userInfo: ', data);

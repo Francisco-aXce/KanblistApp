@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from "@angular/router";
+import { DataService } from '../services/data.service';
 
 @NgModule({
   declarations: [
@@ -10,6 +11,9 @@ import { RouterModule } from "@angular/router";
     RouterModule,
   ],
   exports: [
+  ],
+  providers: [
+    DataService
   ]
 })
 export class PrivateSharedModule { }

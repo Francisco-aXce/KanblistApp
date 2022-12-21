@@ -1,7 +1,7 @@
-import { User } from "@angular/fire/auth";
+import { ParsedToken } from "@angular/fire/auth";
 
 export interface UserData {
-  user: User,
+  claims: ParsedToken,
 };
 
 // user form types: 'login' | 'signup'

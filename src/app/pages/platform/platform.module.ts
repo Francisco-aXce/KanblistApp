@@ -7,6 +7,7 @@ import { PlatformRoutingModule } from './platform-routing.module';
 import { PlatformPageComponent } from './platform.page/platform.page.component';
 import { GoalPageComponent } from './goal.page/goal.page.component';
 import { GoalsPageComponent } from './goals.page/goals.page.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -17,6 +18,7 @@ import { GoalsPageComponent } from './goals.page/goals.page.component';
   ],
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     PlatformRoutingModule,
     PrivateSharedModule,
     SharedModule,

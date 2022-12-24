@@ -17,6 +17,7 @@ import { ProjectHeaderComponent } from './project/project-header/project-header.
 import { BoardComponent } from './project/board/board.component';
 import { ProjectsSectionComponent } from './project/projects-section/projects-section.component';
 import { TaskComponent } from './project/task/task.component';
+import { DataService } from '../services/data.service';
 
 
 @NgModule({
@@ -52,6 +53,9 @@ import { TaskComponent } from './project/task/task.component';
     ProjectsSectionComponent,
     TaskComponent,
     BoardComponent,
-  ]
+  ],
+  providers: [
+    DataService,
+  ],
 })
 export class SharedModule { }

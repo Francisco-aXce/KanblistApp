@@ -1,21 +1,38 @@
 import { Injectable } from '@angular/core';
-import { onSnapshot } from '@angular/fire/firestore';
-import { combineLatest, map, of, switchMap, tap } from 'rxjs';
-import { UserData } from '../models/user.model';
-import { AuthService } from './auth.service';
-import { FireService } from './fire.service';
+import { HttpClient } from '@angular/common/http';
+import { Project } from '../models/projects.model';
+import { ToastrService } from 'ngx-toastr';
+import { catchError, of, tap } from 'rxjs';
+import { ManagementService } from './management.service';
 
 @Injectable()
 export class DataService {
 
-  // #region Observables data
-
-  // projectsObs$ = onSnapshot(this.fireService.col('projects'))
-
-  // #endregion
+  // FIXME: This is a temporary solution to call the APIs
+  baseUrlProjects = 'http://localhost:5001/kanb-list/us-central1/apiprojects/api/v1';
 
   constructor(
-    private fireService: FireService,
-    private authService: AuthService,
+    private http: HttpClient,
+    private toastr: ToastrService,
+    private managementService: ManagementService,
   ) { }
+
+  // #region Projects
+
+  createProject(projectData: Project, successMessage = 'Project saved correctly', errorMessage = 'Error while saving project') {
+    const body = {
+      projectData,
+    };
+    return this.http.post(this.baseUrlProjects + '/create', body, { responseType: 'json' })
+      .pipe(
+        tap(() => this.toastr.success(successMessage, 'Success')),
+        catchError((error) => {
+          this.toastr.error(errorMessage, 'Error');
+          this.managementService.error(error);
+          return of(null);
+        }),
+      );
+  }
+
+  // #endregion
 }

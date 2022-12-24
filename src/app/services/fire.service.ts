@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, doc, setDoc, serverTimestamp, DocumentReference, DocumentData, WithFieldValue, collection, query, QueryConstraint, CollectionReference, onSnapshot, docSnapshots, Unsubscribe, orderBy } from '@angular/fire/firestore';
+import { Firestore, doc, setDoc, serverTimestamp, DocumentReference, DocumentData, WithFieldValue, collection, query, QueryConstraint, CollectionReference, onSnapshot, docSnapshots, Unsubscribe, orderBy, where, FieldPath, WhereFilterOp } from '@angular/fire/firestore';
 import { ToastrService } from 'ngx-toastr';
 import { map } from 'rxjs';
 import { gralDoc } from '../models/docs.model';
@@ -30,6 +30,18 @@ export class FireService {
     const col = collection(this.firestore, path);
     if (queryFn) return query(col, ...queryFn) as CollectionReference<DocumentData>;
     return col;
+  }
+
+  //  #endregion
+
+  //  #region Query
+
+  orderBy(field: string, direction: 'asc' | 'desc' = 'asc'): QueryConstraint {
+    return orderBy(field, direction);
+  }
+
+  where(field: string | FieldPath, operator: WhereFilterOp, value: unknown): QueryConstraint {
+    return where(field, operator, value);
   }
 
   //  #endregion
@@ -72,8 +84,8 @@ export class FireService {
       });
   }
 
-  onSnapshotCol$(path: string, callback: Function): Unsubscribe {
-    return onSnapshot(this.col(path, [orderBy('createdAt', 'desc')]), (querySnapshot) => {
+  onSnapshotCol$(path: string, callback: Function, queryFn?: QueryConstraint[]): Unsubscribe {
+    return onSnapshot(queryFn ? this.col(path, queryFn) : this.col(path), (querySnapshot) => {
       if (querySnapshot.empty) return callback([]);
       const finalData: gralDoc[] = querySnapshot.docs.map((doc) => {
         return {

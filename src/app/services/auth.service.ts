@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { from, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
+import { catchError, from, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
 import { ManagementService, Constants } from './management.service';
 import { ToastrService } from 'ngx-toastr';
 import {
@@ -25,6 +25,12 @@ export class AuthService {
     tap((data) => {
       this.managementService.loaded = true;
       this.managementService.log('userInfo: ', data);
+    }),
+    catchError((error) => {
+      this.managementService.error(error);
+      this.logout();
+      window.location.reload();
+      return of(null);
     }),
     shareReplay(1),
   );

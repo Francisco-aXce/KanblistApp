@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { DataService } from 'src/app/services/data.service';
 
 @Component({
   selector: 'app-project-card',
@@ -9,8 +10,11 @@ export class ProjectCardComponent implements OnInit {
 
   // TODO: add model for project
   @Input() project: any;
+  @Input() canPreview: Function | undefined;
 
-  constructor() { }
+  constructor(
+    public dataService: DataService,
+  ) { }
 
   ngOnInit(): void {
   }

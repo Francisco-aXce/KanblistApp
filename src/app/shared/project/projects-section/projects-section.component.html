@@ -4,15 +4,14 @@
       <i *ngIf="icon" [class]="icon + ' h4'"></i>
       {{sectionName}}
     </div>
-    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addProject" *ngIf="canAdd"><i
-        class="bi bi-plus-lg"></i></button>
+    <button class="btn btn-light" *ngIf="canAdd" (click)="canAdd()"><i class="bi bi-plus-lg"></i></button>
   </div>
   <div class="card-body">
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
       <ng-container *ngIf="projects.length; else noContent">
         <ng-container *ngFor="let project of projects">
           <div class="col">
-            <app-project-card [project]="project"></app-project-card>
+            <app-project-card [project]="project" [canPreview]="canPreview"></app-project-card>
           </div>
         </ng-container>
       </ng-container>

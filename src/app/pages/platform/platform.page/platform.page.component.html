@@ -1,8 +1,8 @@
 <div class="container pt-10">
 
   <section>
-    <app-projects-section [canAdd]="true" [projects]="projects" [icon]="'bi bi-person-fill'"
-      [sectionName]="'Your projects'"></app-projects-section>
+    <app-projects-section [canAdd]="newPCallback" [canPreview]="previewPCallback" [projects]="projects"
+      [icon]="'bi bi-person-fill'" [sectionName]="'Your projects'"></app-projects-section>
   </section>
 
   <section>
@@ -13,51 +13,97 @@
 </div>
 
 <!-- Modal add project -->
-<div class="modal fade" id="addProject" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-  aria-labelledby="addProjectLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="addProjectLabel">Create new project</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<ng-template #modalNewProject let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">New project</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="projectForm" action="Create project">
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="Delivery app">
+        <label for="floatingName">Name</label>
+        <div>
+          <!-- TODO: Add message depending on the error -->
+          <ng-container *ngIf="name.dirty || name.touched">
+            <small class="text-danger" *ngIf="!name.valid">Type a valid name</small>
+            <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+            <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+          </ng-container>
+        </div>
       </div>
-      <div class="modal-body">
-        <form [formGroup]="projectForm" action="Create project">
-          <div class="form-floating mb-3">
-            <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="Delivery app">
-            <label for="floatingName">Name</label>
-            <div>
-              <!-- TODO: Add message depending on the error -->
-              <ng-container *ngIf="name.dirty || name.touched">
-                <small class="text-danger" *ngIf="!name.valid">Type a valid name</small>
-                <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
-                <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
-              </ng-container>
-            </div>
-          </div>
-          <!-- <div class="form-floating">
-            <input type="password" class="form-control" formControlName="password" id="floatingPassword"
-              placeholder="Password">
-            <label for="floatingPassword">Password</label>
-            <div>
-              <ng-container *ngIf="password.dirty || password.touched">
-                <small class="text-danger" *ngIf="!password.value">Password is required</small>
-                <small class="text-danger" *ngIf="password.value && password.invalid">A correct password has at least 6
-                  characters</small>
-              </ng-container>
-            </div>
-            <a routerLink="../register">New user? Sign up</a>
-          </div> -->
-          <!-- <div class="d-flex mt-3">
-            <button type="submit" class="btn btn-success">Submit</button>
-          </div> -->
-        </form>
+      <div class="d-lg-flex flex-lg-row-reverse justify-content-lg-around mb-3">
+        <div>
+          <label for="project-image-select" class="text-nowrap d-block text-center">Select an image</label>
+          <input id="project-image-select" type="text" class="form-control" formControlName="image"
+            [ngbTypeahead]="search" (focus)="focus$.next($any($event).target.value)" placeholder="Search by name"
+            [editable]="false" />
+          <ng-container *ngIf="image.dirty || image.touched">
+            <small class="text-danger" *ngIf="!image.valid">Select a valid image</small>
+            <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+            <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+          </ng-container>
+        </div>
+        <img [src]="'./../../../../assets/Projects/'+image.value+'.webp'" alt="Project image preview"
+          (error)="dataService.errorImgProject($event)" style="width: 30rem; max-width: 100%;">
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" [disabled]="projectForm.invalid"
-          (click)="saveProject()">Save</button>
+      <div class="form-floating">
+        <textarea class="form-control" placeholder="Project description" id="floatingTextarea2"
+          style="height: 150px"></textarea>
+        <label for="floatingTextarea2">Project description</label>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" [disabled]="projectForm.invalid" (click)="saveProject()">Save</button>
+  </div>
+</ng-template>
+
+<!-- Modal project preview -->
+<ng-template #modalProjectPreview let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Project name</h4>
+    <button type="button" class="btn-close" aria-label="Close"
+      (click)="modal.dismiss('Cross click'); projectToPreview=undefined"></button>
+  </div>
+  <div class="modal-body">
+    <!-- Owner -->
+    <div class="mb-3">
+      <app-user-info [name]="'Project person name'" [tag]="'Owner'" [email]="'example@gmail.com'"></app-user-info>
+    </div>
+    <!-- Users dropdown -->
+    <!-- TODO: Add users dropdown with actions needed -->
+    <div class="d-flex mb-4">
+      <div class="col-4" style="border-bottom: 0.4rem green solid;">
+        <p class="my-0 text-center">Edit</p>
+        <div class="d-flex justify-content-center">
+          <i class="bi bi-caret-down-fill my-0"></i>
+        </div>
+      </div>
+      <div class="col-4" style="border-bottom: 0.4rem red solid;">
+        <p class="my-0 text-center">Admin</p>
+        <div class="d-flex justify-content-center">
+          <i class="bi bi-caret-down-fill my-0"></i>
+        </div>
+      </div>
+      <div class="col-4" style="border-bottom: 0.4rem yellow solid;">
+        <p class="my-0 text-center">Read</p>
+        <div class="d-flex justify-content-center">
+          <i class="bi bi-caret-down-fill my-0"></i>
+        </div>
       </div>
     </div>
+    <!-- Content -->
+    <!-- TODO: Add markdown viewer -->
+    <div>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt libero quaerat dicta repellendus in possimus
+        dolore quas sint magnam laborum provident, quae officia autem recusandae saepe tempore vel numquam cumque!
+      </p>
+    </div>
   </div>
-</div>
+  <!-- <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+  </div> -->
+</ng-template>

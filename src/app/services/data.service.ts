@@ -4,6 +4,7 @@ import { Project } from '../models/projects.model';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of, tap } from 'rxjs';
 import { ManagementService } from './management.service';
+import { defaultImage } from 'src/assets/Projects/valid-images.project';
 
 @Injectable()
 export class DataService {
@@ -32,6 +33,10 @@ export class DataService {
           return of(null);
         }),
       );
+  }
+
+  errorImgProject(event: Event) {
+    (event.target as HTMLImageElement).src = `assets/Projects/${defaultImage}.webp`;
   }
 
   // #endregion

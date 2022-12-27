@@ -18,6 +18,7 @@ import { BoardComponent } from './project/board/board.component';
 import { ProjectsSectionComponent } from './project/projects-section/projects-section.component';
 import { TaskComponent } from './project/task/task.component';
 import { DataService } from '../services/data.service';
+import { UserInfoComponent } from './global/user-info/user-info.component';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import { DataService } from '../services/data.service';
     ProjectsSectionComponent,
     TaskComponent,
     BoardComponent,
+    UserInfoComponent,
   ],
   imports: [
     CommonModule,
@@ -53,6 +55,7 @@ import { DataService } from '../services/data.service';
     ProjectsSectionComponent,
     TaskComponent,
     BoardComponent,
+    UserInfoComponent,
   ],
   providers: [
     DataService,

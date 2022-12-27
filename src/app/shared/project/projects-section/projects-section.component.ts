@@ -12,7 +12,8 @@ export class ProjectsSectionComponent implements OnInit {
   @Input() sectionName!: string;
   @Input() emptyMessage = 'Nothing to show here';
   @Input() icon?: string;
-  @Input() canAdd = false;
+  @Input() canAdd: Function | undefined;
+  @Input() canPreview: Function | undefined;
 
   constructor() { }
 

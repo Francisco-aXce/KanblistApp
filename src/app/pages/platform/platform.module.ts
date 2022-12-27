@@ -7,7 +7,10 @@ import { PlatformRoutingModule } from './platform-routing.module';
 import { PlatformPageComponent } from './platform.page/platform.page.component';
 import { GoalPageComponent } from './goal.page/goal.page.component';
 import { GoalsPageComponent } from './goals.page/goals.page.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+// THIS MAY BE IN APP MODULE
+import { NgbDropdownModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 @NgModule({
@@ -22,6 +25,10 @@ import { ReactiveFormsModule } from '@angular/forms';
     PlatformRoutingModule,
     PrivateSharedModule,
     SharedModule,
+
+    NgbDropdownModule,
+    NgbTypeaheadModule,
+    FormsModule
   ]
 })
 export class PlatformModule { }

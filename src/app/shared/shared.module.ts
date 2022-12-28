@@ -4,10 +4,9 @@ import { RouterModule } from "@angular/router";
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
-
+// import { QuillModule } from 'ngx-quill';
 
 import { TakeNWordPipe } from '../pipes/take-n-word.pipe';
-
 
 import { LayoutComponent } from './global/layout/layout.component';
 import { PublicProfileComponent } from './auth/public-profile/public-profile.component';
@@ -46,6 +45,7 @@ import { UserInfoComponent } from './global/user-info/user-info.component';
     RouterModule,
     ReactiveFormsModule,
     NgbDropdownModule,
+    // QuillModule.forRoot(),
   ],
   exports: [
     TakeNWordPipe,

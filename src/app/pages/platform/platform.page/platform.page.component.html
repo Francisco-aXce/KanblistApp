@@ -48,11 +48,12 @@
         <img [src]="'./../../../../assets/Projects/'+image.value+'.webp'" alt="Project image preview"
           (error)="dataService.errorImgProject($event)" style="width: 30rem; max-width: 100%;">
       </div>
-      <div class="form-floating">
+      <quill-editor></quill-editor>
+      <!-- <div class="form-floating">
         <textarea class="form-control" placeholder="Project description" id="floatingTextarea2"
           style="height: 150px"></textarea>
         <label for="floatingTextarea2">Project description</label>
-      </div>
+      </div> -->
     </form>
   </div>
   <div class="modal-footer">

@@ -10,6 +10,7 @@ import { GoalsPageComponent } from './goals.page/goals.page.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgbDropdownModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
+import { QuillModule } from 'ngx-quill'
 
 
 @NgModule({
@@ -27,7 +28,8 @@ import { NgbDropdownModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstra
 
     NgbDropdownModule,
     NgbTypeaheadModule,
-    FormsModule
+    FormsModule,
+    QuillModule.forRoot()
   ]
 })
 export class PlatformModule { }

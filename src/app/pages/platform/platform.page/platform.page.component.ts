@@ -11,6 +11,7 @@ import { ManagementService } from 'src/app/services/management.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { defaultImage, validImages } from 'src/assets/Projects/valid-images.project';
 import { Project } from 'src/app/models/projects.model';
+import { QuillConfig } from 'ngx-quill/config';
 
 @Component({
   selector: 'app-platform.page',
@@ -39,11 +40,13 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
 
   readonly projectForm = new UntypedFormGroup({
     name: new UntypedFormControl('', [Validators.required, Validators.minLength(1), Validators.maxLength(50)]),
-    image: new UntypedFormControl('', [Validators.required]),
+    image: new UntypedFormControl(''),
+    description: new UntypedFormControl('', [Validators.required, Validators.minLength(1)]),
   });
 
   get name() { return this.projectForm.get('name') as UntypedFormControl; }
   get image() { return this.projectForm.get('image') as UntypedFormControl; }
+  get description() { return this.projectForm.get('description') as UntypedFormControl; }
 
   // #region Search image input
   focus$ = new Subject<string>();
@@ -56,6 +59,14 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
       map((term) => !term?.length ? validImages : validImages.filter((v) => v.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10)),
     );
   };
+  // #endregion
+
+  // #region Quill config
+
+  quillConfig: QuillConfig = {
+    format: 'json',
+  };
+
   // #endregion
 
   constructor(
@@ -102,6 +113,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   }
 
   async saveProject() {
+    this.projectForm.markAllAsTouched();
     if (this.projectForm.invalid) return;
 
     // Just to make sure a valid image is selected and to handle default selection
@@ -110,6 +122,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
     const projectData = {
       name: this.name.value,
       image: this.image.value,
+      description: this.description.value,
     };
 
     await lastValueFrom(this.dataService.createProject(projectData))

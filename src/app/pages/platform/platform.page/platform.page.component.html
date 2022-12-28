@@ -50,17 +50,19 @@
             (error)="dataService.errorImgProject($event)" class="w-100 shadow">
         </div>
       </div>
-      <quill-editor></quill-editor>
-      <!-- <div class="form-floating">
-        <textarea class="form-control" placeholder="Project description" id="floatingTextarea2"
-          style="height: 150px"></textarea>
-        <label for="floatingTextarea2">Project description</label>
-      </div> -->
+      <div>
+        <quill-editor formControlName="description" [format]="quillConfig.format"></quill-editor>
+        <ng-container *ngIf="description.dirty || description.touched">
+          <small class="text-danger" *ngIf="!description.valid">Please provide a description</small>
+          <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+          <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+        </ng-container>
+      </div>
     </form>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
-    <button type="button" class="btn btn-primary" [disabled]="projectForm.invalid" (click)="saveProject()">Save</button>
+    <button type="button" class="btn btn-primary" (click)="saveProject()">Save</button>
   </div>
 </ng-template>
 

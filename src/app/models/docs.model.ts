@@ -1,5 +1,5 @@
 
-export interface gralDoc {
+export interface GralDoc {
   id: string,
   path: string,
   exists: boolean,

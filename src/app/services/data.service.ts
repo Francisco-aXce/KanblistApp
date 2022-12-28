@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Project } from '../models/projects.model';
+import { ProjectCreation } from '../models/projects.model';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of, tap } from 'rxjs';
 import { ManagementService } from './management.service';
@@ -20,7 +20,7 @@ export class DataService {
 
   // #region Projects
 
-  createProject(projectData: Project, successMessage = 'Project saved correctly', errorMessage = 'Error while saving project') {
+  createProject(projectData: ProjectCreation, successMessage = 'Project saved correctly', errorMessage = 'Error while saving project') {
     const body = {
       projectData,
     };

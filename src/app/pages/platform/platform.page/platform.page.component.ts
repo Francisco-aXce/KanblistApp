@@ -4,13 +4,13 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject, OperatorFunction, of, lastValueFrom, merge } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, filter, first, map, tap } from 'rxjs/operators';
-import { gralDoc } from 'src/app/models/docs.model';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { FireService } from 'src/app/services/fire.service';
 import { ManagementService } from 'src/app/services/management.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { defaultImage, validImages } from 'src/assets/Projects/valid-images.project';
+import { Project } from 'src/app/models/projects.model';
 
 @Component({
   selector: 'app-platform.page',
@@ -20,8 +20,7 @@ import { defaultImage, validImages } from 'src/assets/Projects/valid-images.proj
 export class PlatformPageComponent implements OnInit, OnDestroy {
 
   projectsUnsub: Unsubscribe | undefined;
-  // TODO: add model for project
-  projects: any[] = [];
+  projects: Project[] = [];
 
   projectToPreview: any | undefined;
 
@@ -80,7 +79,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
         }
 
         this.projectsUnsub = this.fireService.onSnapshotCol$(`users/${userId}/projects`,
-          (docs: gralDoc[]) => this.getProjects(docs),
+          (docs: Project[]) => this.getProjects(docs),
           [this.fireService.orderBy('createdAt', 'desc'), this.fireService.where('active', '==', true)]);
 
       }),
@@ -97,7 +96,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
     if (this.projectsUnsub) this.projectsUnsub();
   }
 
-  private getProjects(projects: gralDoc[]) {
+  private getProjects(projects: Project[]) {
     this.projects = projects;
     this.managementService.log('Projects: ', this.projects);
   }

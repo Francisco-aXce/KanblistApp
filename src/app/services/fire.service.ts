@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Firestore, doc, setDoc, serverTimestamp, DocumentReference, DocumentData, WithFieldValue, collection, query, QueryConstraint, CollectionReference, onSnapshot, docSnapshots, Unsubscribe, orderBy, where, FieldPath, WhereFilterOp } from '@angular/fire/firestore';
 import { ToastrService } from 'ngx-toastr';
 import { map } from 'rxjs';
-import { gralDoc } from '../models/docs.model';
+import { GralDoc } from '../models/docs.model';
 import { ManagementService } from './management.service';
 
 @Injectable({
@@ -70,7 +70,7 @@ export class FireService {
   onSnapshotDoc$(path: string, callback: Function): Unsubscribe {
     return onSnapshot(this.doc(path), (doc) => {
       if (!doc.exists()) return callback(null);
-      const finalData: gralDoc = {
+      const finalData: GralDoc = {
         id: doc.id,
         ...doc.data(),
         path: doc.ref.path,
@@ -87,7 +87,7 @@ export class FireService {
   onSnapshotCol$(path: string, callback: Function, queryFn?: QueryConstraint[]): Unsubscribe {
     return onSnapshot(queryFn ? this.col(path, queryFn) : this.col(path), (querySnapshot) => {
       if (querySnapshot.empty) return callback([]);
-      const finalData: gralDoc[] = querySnapshot.docs.map((doc) => {
+      const finalData: GralDoc[] = querySnapshot.docs.map((doc) => {
         return {
           id: doc.id,
           ...doc.data(),

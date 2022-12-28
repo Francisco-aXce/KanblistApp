@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from "@angular/router";
 import { ReactiveFormsModule } from '@angular/forms';
 
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+
+
 import { TakeNWordPipe } from '../pipes/take-n-word.pipe';
 
 
@@ -42,6 +45,7 @@ import { UserInfoComponent } from './global/user-info/user-info.component';
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
+    NgbDropdownModule,
   ],
   exports: [
     TakeNWordPipe,

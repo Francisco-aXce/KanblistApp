@@ -1,18 +1,16 @@
 <ng-container *ngIf="(managementService.loaded$ | async); else loading">
   <ng-container *ngIf="userData; else login">
-    <div class="dropdown d-flex">
+    <div ngbDropdown #dropUser="ngbDropdown" class="d-flex">
       <p class="text-white fw-bold my-auto me-1">{{userData.claims?.name}}</p>
-      <button class="btn userPfp" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <button type="button" class="btn userPfp" (click)="$event.stopPropagation(); dropUser.open();">
         <img [src]="userData.claims?.picture || './../../../assets/nouser.svg'" referrerpolicy="no-referrer"
           alt="user profile picture">
       </button>
-      <ul class="dropdown-menu dropdown-menu-end mt-2">
-        <li><a class="dropdown-item" routerLink="/profile">Profile</a></li>
-        <li>
-          <hr class="dropdown-divider">
-        </li>
-        <li><a class="btn btn btn-danger dropdown-item" (click)="authService.logout()">Log Out</a></li>
-      </ul>
+      <div ngbDropdownMenu aria-labelledby="dropUser">
+        <button ngbDropdownItem [routerLink]="['profile']">Profile</button>
+        <hr class="dropdown-divider">
+        <button ngbDropdownItem class="btn btn-danger rounded-0" (click)="authService.logout()">Log Out</button>
+      </div>
     </div>
   </ng-container>
 

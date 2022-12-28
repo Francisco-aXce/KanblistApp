@@ -9,7 +9,6 @@ import { GoalPageComponent } from './goal.page/goal.page.component';
 import { GoalsPageComponent } from './goals.page/goals.page.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-// THIS MAY BE IN APP MODULE
 import { NgbDropdownModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 
 

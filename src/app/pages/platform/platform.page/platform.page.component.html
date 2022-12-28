@@ -45,8 +45,10 @@
             <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
           </ng-container>
         </div>
-        <img [src]="'./../../../../assets/Projects/'+image.value+'.webp'" alt="Project image preview"
-          (error)="dataService.errorImgProject($event)" style="width: 30rem; max-width: 100%;">
+        <div style="width: 30rem; max-width: 100%; min-height: 15rem;">
+          <img [src]="'./../../../../assets/Projects/'+image.value+'.webp'" alt="Project image preview"
+            (error)="dataService.errorImgProject($event)" class="w-100 shadow">
+        </div>
       </div>
       <quill-editor></quill-editor>
       <!-- <div class="form-floating">
@@ -76,7 +78,7 @@
     </div>
     <!-- Users dropdown -->
     <!-- TODO: Add users dropdown with actions needed -->
-    <div class="d-flex mb-4">
+    <!-- <div class="d-flex mb-4">
       <div class="col-4" style="border-bottom: 0.4rem green solid;">
         <p class="my-0 text-center">Edit</p>
         <div class="d-flex justify-content-center">
@@ -95,14 +97,11 @@
           <i class="bi bi-caret-down-fill my-0"></i>
         </div>
       </div>
-    </div>
+    </div> -->
     <!-- Content -->
-    <!-- TODO: Add markdown viewer -->
     <div>
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt libero quaerat dicta repellendus in possimus
-        dolore quas sint magnam laborum provident, quae officia autem recusandae saepe tempore vel numquam cumque!
-      </p>
+      <quill-view [format]="'json'"
+        [content]="'Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita sunt quaerat cumque excepturi vitae officiis nobis, impedit quae aspernatur eaque quasi perferendis vero nostrum enim, odio iusto nisi, delectus dignissimos.'"></quill-view>
     </div>
   </div>
   <!-- <div class="modal-footer">

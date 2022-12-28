@@ -1,11 +1,11 @@
-<div class="card overflow-hidden">
+<div class="card overflow-hidden shadow">
   <img [src]="'./../../../../assets/Projects/'+project.image+'.webp'" (error)="dataService.errorImgProject($event)"
     class="card-img-top pjct-img" [routerLink]="[project.id]" alt="Project image" style="max-width: 480px;">
-  <div class="card-body p-3">
+  <div class="card-body">
     <div class="d-flex justify-content-between">
-      <p class="card-title h5 mx-0 my-auto">{{project.name}}</p>
+      <p class="card-title h5 mx-0 my-auto text-break">{{project.name}}</p>
       <div>
-        <button class="btn btn-primary rounded-5 px-2 py-1" *ngIf="canPreview" (click)="canPreview(project)">
+        <button class="btn btn-outline-dark info-project" *ngIf="canPreview" (click)="canPreview(project)">
           <i class="bi bi-eye-fill"></i>
         </button>
       </div>

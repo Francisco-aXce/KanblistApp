@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card shadow">
   <div class="card-header d-flex justify-content-between">
     <div>
       <i *ngIf="icon" [class]="icon + ' h4'"></i>
@@ -7,7 +7,7 @@
     <button class="btn btn-light" *ngIf="canAdd" (click)="canAdd()"><i class="bi bi-plus-lg"></i></button>
   </div>
   <div class="card-body">
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
       <ng-container *ngIf="projects.length; else noContent">
         <ng-container *ngFor="let project of projects">
           <div class="col">

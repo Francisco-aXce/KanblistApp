@@ -69,9 +69,8 @@
 <!-- Modal project preview -->
 <ng-template #modalProjectPreview let-modal>
   <div class="modal-header">
-    <h4 class="modal-title">Project name</h4>
-    <button type="button" class="btn-close" aria-label="Close"
-      (click)="modal.dismiss('Cross click'); projectToPreview=undefined"></button>
+    <h4 class="modal-title">{{projectToPreview.name}}</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
     <!-- Owner -->
@@ -102,8 +101,7 @@
     </div> -->
     <!-- Content -->
     <div>
-      <quill-view [format]="'json'"
-        [content]="'Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita sunt quaerat cumque excepturi vitae officiis nobis, impedit quae aspernatur eaque quasi perferendis vero nostrum enim, odio iusto nisi, delectus dignissimos.'"></quill-view>
+      <quill-view [format]="'json'" [content]="projectToPreview.description"></quill-view>
     </div>
   </div>
   <!-- <div class="modal-footer">

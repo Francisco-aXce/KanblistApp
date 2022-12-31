@@ -108,6 +108,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   }
 
   private async getProjects(userId: string, projects: Project[]) {
+    this.projects = [];
     for (const project of projects) {
       const description = await this.dataService.getProjectDesc(userId, project.id);
       this.projects.push({

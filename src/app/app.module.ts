@@ -7,6 +7,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { environment } from '../environments/environment';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirestore, getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
+import { provideStorage, getStorage, connectStorageEmulator } from '@angular/fire/storage';
 import { ToastrModule } from 'ngx-toastr';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -32,6 +33,11 @@ import { AuthTokenInterceptor } from './interceptors/auth-token.interceptor';
       const firestore = getFirestore();
       if (environment.useEmulators) connectFirestoreEmulator(firestore, 'localhost', 8080);
       return firestore;
+    }),
+    provideStorage(() => {
+      const storage = getStorage();
+      if (environment.useEmulators) connectStorageEmulator(storage, 'localhost', 9199);
+      return storage;
     }),
     BrowserAnimationsModule,
     ToastrModule.forRoot(),

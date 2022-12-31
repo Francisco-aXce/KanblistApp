@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Firestore, doc, setDoc, serverTimestamp, DocumentReference, DocumentData, WithFieldValue, collection, query, QueryConstraint, CollectionReference, onSnapshot, docSnapshots, Unsubscribe, orderBy, where, FieldPath, WhereFilterOp } from '@angular/fire/firestore';
+import {
+  Firestore, doc, setDoc, serverTimestamp, DocumentReference, DocumentData, WithFieldValue,
+  collection, query, QueryConstraint, CollectionReference, onSnapshot, docSnapshots, Unsubscribe, orderBy,
+  where, FieldPath, WhereFilterOp
+} from '@angular/fire/firestore';
 import { ToastrService } from 'ngx-toastr';
 import { map } from 'rxjs';
 import { GralDoc } from '../models/docs.model';

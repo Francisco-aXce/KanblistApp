@@ -90,7 +90,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
         }
 
         this.projectsUnsub = this.fireService.onSnapshotCol$(`users/${userId}/projects`,
-          (docs: Project[]) => this.getProjects(docs),
+          (docs: Project[]) => this.getProjects(userId, docs),
           [this.fireService.orderBy('createdAt', 'desc'), this.fireService.where('active', '==', true)]);
 
       }),
@@ -107,8 +107,14 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
     if (this.projectsUnsub) this.projectsUnsub();
   }
 
-  private getProjects(projects: Project[]) {
-    this.projects = projects;
+  private async getProjects(userId: string, projects: Project[]) {
+    for (const project of projects) {
+      const description = await this.dataService.getProjectDesc(userId, project.id);
+      this.projects.push({
+        ...project,
+        description,
+      });
+    };
     this.managementService.log('Projects: ', this.projects);
   }
 

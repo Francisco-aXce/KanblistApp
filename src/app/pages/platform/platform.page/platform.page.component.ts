@@ -34,6 +34,14 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   };
 
   readonly previewPCallback = (project: any) => {
+    if (!project.description) {
+      const projIndex = this.projects.findIndex((p) => p.id === project.id);
+      if (projIndex === -1) return;
+      this.dataService.getProjectDesc(project.owner.id, project.id)
+        .then((desc) => {
+          this.projects[projIndex].description = desc;
+        });
+    }
     this.projectToPreview = project;
     this.modalService.open(this.modalProjectPreview, { centered: true, size: 'xl' });
   };
@@ -108,14 +116,15 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   }
 
   private async getProjects(userId: string, projects: Project[]) {
-    this.projects = [];
-    for (const project of projects) {
-      const description = await this.dataService.getProjectDesc(userId, project.id);
-      this.projects.push({
-        ...project,
-        description,
-      });
-    };
+    this.projects = projects;
+    // this.projects = [];
+    // for (const project of projects) {
+    //   const description = await this.dataService.getProjectDesc(userId, project.id);
+    //   this.projects.push({
+    //     ...project,
+    //     description,
+    //   });
+    // };
     this.managementService.log('Projects: ', this.projects);
   }
 

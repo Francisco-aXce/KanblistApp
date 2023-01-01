@@ -1,5 +1,5 @@
 <div class="card overflow-hidden shadow">
-  <img [src]="'./../../../../assets/Projects/'+project.image+'.webp'" (error)="dataService.errorImgProject($event)"
+  <img [src]="'./../../../../assets/Projects/'+(project.image ?? dataService.defaultProjImage)+'.webp'"
     class="card-img-top pjct-img" [routerLink]="[project.id]" alt="Project image" style="max-width: 480px;">
   <div class="card-body">
     <div class="d-flex justify-content-between">

@@ -47,8 +47,8 @@ export class DataService {
     return this.projectsDescs[projectId];
   }
 
-  errorImgProject(event: Event) {
-    (event.target as HTMLImageElement).src = `assets/Projects/${defaultImage}.webp`;
+  get defaultProjImage() {
+    return defaultImage;
   }
 
   // #endregion

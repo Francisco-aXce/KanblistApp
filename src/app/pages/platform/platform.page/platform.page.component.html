@@ -75,7 +75,8 @@
   <div class="modal-body">
     <!-- Owner -->
     <div class="mb-3">
-      <app-user-info [name]="'Project person name'" [tag]="'Owner'" [email]="'example@gmail.com'"></app-user-info>
+      <app-user-info [name]="projectToPreview.owner.name" [tag]="'Owner'"
+        [email]="projectToPreview.owner.email"></app-user-info>
     </div>
     <!-- Users dropdown -->
     <!-- TODO: Add users dropdown with actions needed -->

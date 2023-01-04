@@ -21,6 +21,7 @@ import { ProjectsSectionComponent } from './project/projects-section/projects-se
 import { TaskComponent } from './project/task/task.component';
 import { DataService } from '../services/data.service';
 import { UserInfoComponent } from './global/user-info/user-info.component';
+import { GoalCardComponent } from './project/goal-card/goal-card.component';
 
 
 @NgModule({
@@ -39,6 +40,7 @@ import { UserInfoComponent } from './global/user-info/user-info.component';
     TaskComponent,
     BoardComponent,
     UserInfoComponent,
+    GoalCardComponent,
   ],
   imports: [
     CommonModule,
@@ -60,6 +62,7 @@ import { UserInfoComponent } from './global/user-info/user-info.component';
     TaskComponent,
     BoardComponent,
     UserInfoComponent,
+    GoalCardComponent,
   ],
   providers: [
     DataService,

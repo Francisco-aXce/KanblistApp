@@ -14,6 +14,7 @@ export class DataService {
   baseUrlProjects = 'http://localhost:5001/kanb-list/us-central1/apiprojects/api/v1';
 
   private projectsDescs: { [key: string]: string } = {};
+  private goalsDescs: { [key: string]: string } = {};
 
   constructor(
     private http: HttpClient,
@@ -39,12 +40,21 @@ export class DataService {
       );
   }
 
+  // FIXME: Repetitive code
   async getProjectDesc(owner: string, projectId: string) {
     if (this.projectsDescs[projectId]) return this.projectsDescs[projectId];
     const projectDescResp = await this.storageService.getBlobText(`users/${owner}/projects/${projectId}/description.json`);
     if (!projectDescResp.success) return '';
     this.projectsDescs[projectId] = projectDescResp.text;
     return this.projectsDescs[projectId];
+  }
+
+  async getGoalDesc(owner: string, projectId: string, goalId: string) {
+    if (this.goalsDescs[goalId]) return this.goalsDescs[goalId];
+    const goalDescResp = await this.storageService.getBlobText(`users/${owner}/projects/${projectId}/goals/${goalId}/description.json`);
+    if (!goalDescResp.success) return '';
+    this.goalsDescs[goalId] = goalDescResp.text;
+    return this.goalsDescs[goalId];
   }
 
   get defaultProjImage() {

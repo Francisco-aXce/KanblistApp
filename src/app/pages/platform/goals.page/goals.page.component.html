@@ -1,95 +1,143 @@
-<app-project-header></app-project-header>
-
 <div class="container container-goals">
+  <ng-container *ngIf="(projectObs | async) as projectData">
 
-  <div class="card">
-    <div class="card-header d-flex justify-content-between">
-      <div>
-        <i class="bi bi-flag-fill h4"></i>
-        Project's goals
-      </div>
-      <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addEditGoal"><i
-          class="bi bi-plus-lg"></i></button>
+    <div class="pt-4">
+      <app-project-header [projectName]="projectData.name" [ownerName]="projectData.owner.name"
+        [canEdit]="editProjCallback"></app-project-header>
     </div>
-    <div class="card-body">
-      <ng-container *ngIf="true; else noContent">
-        <div class="accordion">
-          <div class="accordion-item" *ngFor="let goal of [1,2,3,4,5]; index as i">
-            <h2 class="accordion-header" [attr.id]="'heading'">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                [attr.data-bs-target]="'#'+'coll'+i" [attr.aria-controls]="'coll'+i">
-                Accordion Item #1
-              </button>
-            </h2>
-            <div [attr.id]="'coll'+i" class="accordion-collapse collapse" [attr.aria-labelledby]="'heading'">
-              <div class="accordion-body">
-                <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse
-                plugin
-                adds
-                the appropriate classes that we use to style each element. These classes control the overall appearance,
-                as
-                well
-                as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding
-                our
-                default variables. It's also worth noting that just about any HTML can go within the
-                <code>.accordion-body</code>, though the transition does limit overflow.
-                <div class="mt-3">
-                  <button class="btn btn-primary" [routerLink]="['goalId']"><i
-                      class="bi bi-box-arrow-in-right me-1"></i>Open</button>
-                  <button class="btn btn-secondary ms-2" data-bs-toggle="modal" data-bs-target="#addEditGoal">
-                    <i class="bi bi-pencil-fill"></i>
-                  </button>
-                </div>
-              </div>
+
+    <div class="card my-4 shadow">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-center justify-content-md-between gap-4">
+          <ng-container *ngFor="let goal of goals">
+            <div>
+              <app-goal-card [data]="goal" [canPreview]="previewCallback"></app-goal-card>
             </div>
-          </div>
+          </ng-container>
         </div>
-      </ng-container>
-      <ng-template #noContent>
-        <span>No goals defined</span>
-      </ng-template>
+        <div class="d-flex mt-4">
+          <button type="button" class="btn btn-outline-secondary py-3 px-5 shadow mx-auto" (click)="addNewGoal()">
+            <i class="bi bi-plus-lg mx-5"></i>
+          </button>
+        </div>
 
+      </div>
     </div>
-  </div>
+
+  </ng-container>
 
 </div>
 
-<!-- Modal edit project -->
-<div class="modal fade" id="editProject" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-  aria-labelledby="editProjectLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="editProjectLabel">Edit project</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save</button>
-      </div>
+<!-- Modal goal preview -->
+<ng-template #modalGoalPreview let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">{{goalToPreview?.name}}</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <app-user-info [name]="goalToPreview?.attendant?.name" [tag]="'Attendant'"
+        [email]="goalToPreview?.attendant?.email"></app-user-info>
+    </div>
+    <!-- Asigned dropdown -->
+    <!-- TODO: Add users dropdown with actions needed -->
+    <!-- Content -->
+    <div>
+      <quill-view [format]="'json'" [content]="goalToPreview?.description"></quill-view>
     </div>
   </div>
-</div>
+  <!-- <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+  </div> -->
+</ng-template>
 
 <!-- Modal add/edit goal -->
-<div class="modal fade" id="addEditGoal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-  aria-labelledby="addEditGoalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="addEditGoalLabel">Add edit goal</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
+<ng-template #modalAddGoal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">New Goal</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
   </div>
-</div>
+  <div class="modal-body">
+    <form [formGroup]="goalForm" action="Create project">
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" formControlName="name" id="floatingName"
+          placeholder="Product management">
+        <label for="floatingName">Name</label>
+        <div>
+          <!-- TODO: Add message depending on the error -->
+          <ng-container *ngIf="name.dirty || name.touched">
+            <small class="text-danger" *ngIf="!name.valid">Type a valid name</small>
+            <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+            <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+          </ng-container>
+        </div>
+      </div>
+      <div>
+        <quill-editor formControlName="description" [format]="quillConfig.format"></quill-editor>
+        <ng-container *ngIf="description.dirty || description.touched">
+          <small class="text-danger" *ngIf="!description.valid">Please provide a description</small>
+          <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+          <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+        </ng-container>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" (click)="saveGoal()">Save</button>
+  </div>
+</ng-template>
+
+<!-- Modal edit project -->
+<ng-template #modalEditProject let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Edit project</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="projectForm" action="Edit project">
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="Delivery app">
+        <label for="floatingName">Name</label>
+        <div>
+          <!-- TODO: Add message depending on the error -->
+          <ng-container *ngIf="projectName.dirty || projectName.touched">
+            <small class="text-danger" *ngIf="!projectName.valid">Type a valid name</small>
+            <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+            <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+          </ng-container>
+        </div>
+      </div>
+      <!-- FIXME: Need to divide modals in components to avoid duplicate code and template, until that cant edit image -->
+      <!-- <div class="d-lg-flex flex-lg-row-reverse justify-content-lg-around mb-3">
+        <div>
+          <label for="project-image-select" class="text-nowrap d-block text-center">Select an image</label>
+          <input id="project-image-select" type="text" class="form-control" formControlName="image"
+            [ngbTypeahead]="search" (focus)="focus$.next($any($event).target.value)" placeholder="Search by name"
+            [editable]="false" />
+          <ng-container *ngIf="image.dirty || image.touched">
+            <small class="text-danger" *ngIf="!image.valid">Select a valid image</small>
+            <small class="text-danger" *ngIf="true">Don't forget the name</small>
+            <small class="text-danger" *ngIf="true">The name is too long</small>
+          </ng-container>
+        </div>
+        <div style="width: 30rem; max-width: 100%; min-height: 15rem;">
+          <img [src]="'./../../../../assets/Projects/'+(image.value ?? dataService.defaultProjImage)+'.webp'"
+            alt="Project image preview" class="w-100 shadow">
+        </div>
+      </div> -->
+      <div>
+        <quill-editor formControlName="description" [format]="quillConfig.format"></quill-editor>
+        <ng-container *ngIf="projectDescription.dirty || projectDescription.touched">
+          <small class="text-danger" *ngIf="!projectDescription.valid">Please provide a description</small>
+          <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+          <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+        </ng-container>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" (click)="saveProject()">Save</button>
+  </div>
+</ng-template>

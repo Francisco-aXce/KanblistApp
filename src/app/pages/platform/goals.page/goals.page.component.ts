@@ -1,15 +1,120 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Unsubscribe } from '@angular/fire/firestore';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { QuillConfig } from 'ngx-quill';
+import { map, shareReplay, switchMap, tap } from 'rxjs';
+import { Goal } from 'src/app/models/projects.model';
+import { AuthService } from 'src/app/services/auth.service';
+import { FireService } from 'src/app/services/fire.service';
+import { ManagementService } from 'src/app/services/management.service';
+import { StorageService } from 'src/app/services/storage.service';
 
 @Component({
   selector: 'app-goals.page',
   templateUrl: './goals.page.component.html',
   styleUrls: ['./goals.page.component.scss']
 })
-export class GoalsPageComponent implements OnInit {
+export class GoalsPageComponent implements OnInit, OnDestroy {
 
-  constructor() { }
+  @ViewChild('modalGoalPreview') modalGoalPreview!: HTMLElement;
+  @ViewChild('modalAddGoal') modalAddGoal!: HTMLElement;
+  @ViewChild('modalEditProject') modalEditProject!: HTMLElement;
+
+  goalsUnsub: Unsubscribe | undefined;
+  goals: Goal[] = [];
+  goalToPreview: Goal | undefined;
+
+  projectObs = this.route.params.pipe(
+    switchMap(({ projectId }) => this.authService.userInfo$.pipe(
+      map((userData) => `users/${userData?.claims?.['user_id']}/projects/${projectId}`)
+    )),
+    switchMap((projectPath: string) => {
+      this.goalsUnsub?.();
+      this.goalsUnsub = this.fireService.onSnapshotCol$(`${projectPath}/goals`,
+        (goals: Goal[]) => this.getGoals(goals),
+        [this.fireService.orderBy('order', 'asc'), this.fireService.where('active', '==', true)])
+      return this.fireService.doc$(projectPath)
+    }),
+    tap(this.managementService.log),
+    shareReplay(1),
+  );
+
+  quillConfig: QuillConfig = {
+    format: 'json',
+  };
+
+  readonly goalForm = new UntypedFormGroup({
+    name: new UntypedFormControl('', [Validators.required, Validators.minLength(1), Validators.maxLength(50)]),
+    description: new UntypedFormControl('', [Validators.required, Validators.minLength(1)]),
+  });
+
+  get name() { return this.goalForm.get('name') as UntypedFormControl; }
+  get description() { return this.goalForm.get('description') as UntypedFormControl; }
+
+  readonly projectForm = new UntypedFormGroup({
+    name: new UntypedFormControl('', [Validators.required, Validators.minLength(1), Validators.maxLength(50)]),
+    description: new UntypedFormControl('', [Validators.required, Validators.minLength(1)]),
+  });
+
+  get projectName() { return this.projectForm.get('name') as UntypedFormControl; }
+  get projectDescription() { return this.projectForm.get('description') as UntypedFormControl; }
+
+  previewCallback = (goal: Goal) => {
+    if (!goal.description) {
+      const goalIndex = this.goals.findIndex((g) => g.id === goal.id);
+      if (goalIndex < 0) return;
+      this.storageService.getBlobText(`${goal.path}/description.json`)
+        .then((description: { text: string, success: boolean, error?: any }) => this.goals[goalIndex].description = description.text)
+    }
+    this.openGoalModal(goal);
+  }
+
+  editProjCallback = () => this.editProject();
+
+  constructor(
+    private route: ActivatedRoute,
+    private fireService: FireService,
+    private authService: AuthService,
+    private managementService: ManagementService,
+    private modalService: NgbModal,
+    private storageService: StorageService,
+  ) { }
 
   ngOnInit(): void {
+  }
+
+  ngOnDestroy(): void {
+    this.goalsUnsub?.();
+  }
+
+  getGoals(goals: Goal[]) {
+    this.goals = goals;
+    this.managementService.log('Goals', goals);
+  }
+
+  openGoalModal(goal: Goal) {
+    this.goalToPreview = goal;
+    this.modalService.open(this.modalGoalPreview, { centered: true, size: 'xl' });
+  }
+
+  addNewGoal() {
+    this.goalForm.reset();
+    this.modalService.open(this.modalAddGoal, { centered: true, size: 'xl' });
+  }
+
+  saveGoal() {
+
+  }
+
+  editProject() {
+    this.projectForm.reset();
+    this.modalService.open(this.modalEditProject, { centered: true, size: 'xl' });
+  }
+
+  saveProject() {
+
   }
 
 }

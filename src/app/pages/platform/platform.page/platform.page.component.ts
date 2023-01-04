@@ -36,7 +36,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   readonly previewPCallback = (project: any) => {
     if (!project.description) {
       const projIndex = this.projects.findIndex((p) => p.id === project.id);
-      if (projIndex === -1) return;
+      if (projIndex < 0) return;
       this.dataService.getProjectDesc(project.owner.id, project.id)
         .then((desc) => {
           this.projects[projIndex].description = desc;

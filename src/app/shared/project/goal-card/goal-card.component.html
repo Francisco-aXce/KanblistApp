@@ -1,0 +1,11 @@
+<div class="btn-group btn-group shadow" role="goal-card" aria-label="Goal card">
+  <button type="button" class="btn btn-secondary">
+    <i class="bi bi-grip-vertical"></i>
+  </button>
+  <button type="button" class="btn btn-light btn-lg" (click)="canPreview?.(data)">
+    <p class="my-1 min-w-3">{{data?.name || 'Goal name'}}</p>
+  </button>
+  <button type="button" class="btn btn-warning" [routerLink]="[data!.id]">
+    <i class="bi bi-caret-right-fill"></i>
+  </button>
+</div>

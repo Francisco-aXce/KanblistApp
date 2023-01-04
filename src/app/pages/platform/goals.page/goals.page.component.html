@@ -9,7 +9,7 @@
     <div class="card my-4 shadow">
       <div class="card-body">
         <div class="d-flex flex-wrap justify-content-center gap-4" [sortablejs]="goals"
-          [sortablejsOptions]="{handle: '.handle'}">
+          [sortablejsOptions]="goalsDndOptions">
           <ng-container *ngFor="let goal of goals">
             <div>
               <app-goal-card [data]="goal" [canPreview]="previewCallback"></app-goal-card>

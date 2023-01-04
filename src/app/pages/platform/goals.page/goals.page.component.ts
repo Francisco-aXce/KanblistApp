@@ -6,6 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { QuillConfig } from 'ngx-quill';
 import { ToastrService } from 'ngx-toastr';
 import { lastValueFrom, map, shareReplay, switchMap, tap } from 'rxjs';
+import { Options } from 'sortablejs';
 import { Goal } from 'src/app/models/projects.model';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -84,6 +85,13 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   }
 
   editProjCallback = () => this.editProject();
+
+  goalsDndOptions: Options = {
+    handle: '.handle',
+    onSort: (event) => {
+
+    },
+  }
 
   constructor(
     private route: ActivatedRoute,

@@ -1,5 +1,5 @@
 <div class="btn-group btn-group shadow" role="goal-card" aria-label="Goal card">
-  <button type="button" class="btn btn-secondary cursor-grab handle">
+  <button type="button" class="btn btn-secondary cursor-grab handle" (touchstart)="$event.stopPropagation()">
     <i class="bi bi-grip-vertical"></i>
   </button>
   <button type="button" class="btn btn-light btn-lg" (click)="canPreview?.(data)">

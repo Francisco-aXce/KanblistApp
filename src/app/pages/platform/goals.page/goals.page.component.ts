@@ -4,9 +4,11 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { QuillConfig } from 'ngx-quill';
-import { map, shareReplay, switchMap, tap } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { lastValueFrom, map, shareReplay, switchMap, tap } from 'rxjs';
 import { Goal } from 'src/app/models/projects.model';
 import { AuthService } from 'src/app/services/auth.service';
+import { DataService } from 'src/app/services/data.service';
 import { FireService } from 'src/app/services/fire.service';
 import { ManagementService } from 'src/app/services/management.service';
 import { StorageService } from 'src/app/services/storage.service';
@@ -26,6 +28,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   goals: Goal[] = [];
   goalToPreview: Goal | undefined;
 
+  projectInfo: any;
   projectObs = this.route.params.pipe(
     switchMap(({ projectId }) => this.authService.userInfo$.pipe(
       map((userData) => `users/${userData?.claims?.['user_id']}/projects/${projectId}`)
@@ -37,9 +40,18 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
         [this.fireService.orderBy('order', 'asc'), this.fireService.where('active', '==', true)])
       return this.fireService.doc$(projectPath)
     }),
-    tap(this.managementService.log),
+    tap((projData: any) => {
+      this.managementService.log('Project', projData);
+      this.projectInfo = {
+        id: projData.id,
+        name: projData.name,
+        description: projData.description,
+        owner: projData.owner,
+      };
+    }),
     shareReplay(1),
   );
+
 
   quillConfig: QuillConfig = {
     format: 'json',
@@ -80,6 +92,8 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     private managementService: ManagementService,
     private modalService: NgbModal,
     private storageService: StorageService,
+    private dataService: DataService,
+    private toastr: ToastrService,
   ) { }
 
   ngOnInit(): void {
@@ -104,16 +118,50 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     this.modalService.open(this.modalAddGoal, { centered: true, size: 'xl' });
   }
 
-  saveGoal() {
+  async saveGoal() {
+    this.goalForm.markAllAsTouched();
+    if (this.goalForm.invalid) return;
 
+    const goalData = {
+      name: this.name.value,
+      description: this.description.value,
+      order: this.goals.length,
+    }
+
+    await lastValueFrom(this.dataService.createGoal(this.projectInfo, goalData))
+      .then(() => {
+        this.modalService.dismissAll();
+        this.goalForm.reset();
+      });
   }
 
-  editProject() {
-    this.projectForm.reset();
+  async editProject() {
     this.modalService.open(this.modalEditProject, { centered: true, size: 'xl' });
+    if (!this.projectInfo.description) {
+      this.projectInfo.description = await this.dataService.getProjectDesc(this.projectInfo.owner.id, this.projectInfo.id);
+    }
+    this.projectForm.patchValue(this.projectInfo);
   }
 
-  saveProject() {
+  async saveProject() {
+    this.projectForm.markAllAsTouched();
+    if (this.projectForm.invalid) return;
+
+    const newData = {
+      name: this.projectName.value !== this.projectInfo.name ? this.projectName.value : undefined,
+      description: this.projectDescription.value !== this.projectInfo.description ? this.projectDescription.value : undefined,
+    }
+
+    if (!newData.name && !newData.description) {
+      this.toastr.info('No changes made');
+      return;
+    }
+
+    await lastValueFrom(this.dataService.updateProject(this.projectInfo.owner, this.projectInfo.id, newData))
+      .then(() => {
+        if (newData.description) this.dataService.updateLocalProjectDesc(this.projectInfo.id, newData.description);
+        this.modalService.dismissAll();
+      });
 
   }
 

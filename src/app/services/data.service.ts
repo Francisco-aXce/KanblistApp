@@ -40,21 +40,63 @@ export class DataService {
       );
   }
 
+  // TODO: Types
+  updateProject(owner: { id: string }, projectId: string, projectData: any) {
+    const body = {
+      projectId,
+      projectData,
+      owner,
+    };
+    return this.http.put(this.baseUrlProjects + '/edit', body, { responseType: 'json' })
+      .pipe(
+        tap(() => this.toastr.success('Project saved correctly', 'Success')),
+        catchError((error) => {
+          this.toastr.error('Error while saving project', 'Error');
+          this.managementService.error(error);
+          return of(null);
+        }),
+      );
+  }
+
+  // TODO: Add and fix types
+  createGoal(project: any, goalData: any) {
+    const body = {
+      projectInfo: {
+        owner: project.owner,
+        id: project.id,
+      },
+      goalData,
+    };
+    return this.http.post(this.baseUrlProjects + '/createGoal', body, { responseType: 'json' })
+      .pipe(
+        tap(() => this.toastr.success('Goal saved correctly', 'Success')),
+        catchError((error) => {
+          this.toastr.error('Error while saving board', 'Error');
+          this.managementService.error(error);
+          return of(null);
+        }),
+      );
+  }
+
   // FIXME: Repetitive code
-  async getProjectDesc(owner: string, projectId: string) {
-    if (this.projectsDescs[projectId]) return this.projectsDescs[projectId];
+  async getProjectDesc(owner: string, projectId: string, refresh = false) {
+    if (this.projectsDescs[projectId] && !refresh) return this.projectsDescs[projectId];
     const projectDescResp = await this.storageService.getBlobText(`users/${owner}/projects/${projectId}/description.json`);
     if (!projectDescResp.success) return '';
     this.projectsDescs[projectId] = projectDescResp.text;
     return this.projectsDescs[projectId];
   }
 
-  async getGoalDesc(owner: string, projectId: string, goalId: string) {
-    if (this.goalsDescs[goalId]) return this.goalsDescs[goalId];
+  async getGoalDesc(owner: string, projectId: string, goalId: string, refresh = false) {
+    if (this.goalsDescs[goalId] && !refresh) return this.goalsDescs[goalId];
     const goalDescResp = await this.storageService.getBlobText(`users/${owner}/projects/${projectId}/goals/${goalId}/description.json`);
     if (!goalDescResp.success) return '';
     this.goalsDescs[goalId] = goalDescResp.text;
     return this.goalsDescs[goalId];
+  }
+
+  updateLocalProjectDesc(projectId: string, desc: string) {
+    this.projectsDescs[projectId] = desc;
   }
 
   get defaultProjImage() {

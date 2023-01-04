@@ -13,6 +13,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthTokenInterceptor } from './interceptors/auth-token.interceptor';
+import { SortablejsModule } from 'ngx-sortablejs';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { AuthTokenInterceptor } from './interceptors/auth-token.interceptor';
     }),
     BrowserAnimationsModule,
     ToastrModule.forRoot(),
+    SortablejsModule.forRoot({ animation: 150 }),
   ],
   providers: [
     {

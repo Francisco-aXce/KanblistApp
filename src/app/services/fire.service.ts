@@ -5,7 +5,7 @@ import {
   where, FieldPath, WhereFilterOp, updateDoc
 } from '@angular/fire/firestore';
 import { ToastrService } from 'ngx-toastr';
-import { map } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { GralDoc } from '../models/docs.model';
 import { ManagementService } from './management.service';
 
@@ -67,7 +67,8 @@ export class FireService {
     });
   }
 
-  doc$(path: string) {
+  // TODO: Add type
+  doc$(path: string): Observable<any> {
     return docSnapshots(this.doc(path)).pipe(
       map((doc) => {
         return {

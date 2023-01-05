@@ -1,12 +1,11 @@
-<app-project-header></app-project-header>
-<div class="px-4">
-  <div class="container-boards">
-    <ng-container *ngFor="let board of [1,2,3,4,5,6,7]">
-      <app-board></app-board>
-    </ng-container>
+<div *ngIf="(projectObs | async) as dbData">
+  <app-project-header [projectName]="dbData.project.name + ' / ' + dbData.goal.name"
+    [ownerName]="dbData.project.owner.name"></app-project-header>
+  <div class="container-boards" [sortablejs]="boards" [sortablejsOptions]="boardsDndOptions">
+    <app-board class="board-drag" *ngFor="let board of boards" [data]="board"
+      [canEditBoard]="editBoardCallback"></app-board>
     <div class="add-board">
-      <button class="btn btn-light bg-secondary-custom-1 text-start" type="button" data-bs-toggle="modal"
-        data-bs-target="#addBoard">
+      <button class="btn btn-light bg-secondary-custom-1 text-start" type="button" (click)="onCreateBoard()">
         <i class="bi bi-plus-lg mx-1 opacity-50"></i>
         <span class="opacity-50">Add board</span>
       </button>
@@ -14,22 +13,30 @@
   </div>
 </div>
 
-<!-- Modal add board -->
-<div class="modal fade" id="addBoard" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-  aria-labelledby="addBoardLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="addBoardLabel">Add board</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
+<!-- Modal add/edit board -->
+<ng-template #modalBoard let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">{{editMode ? 'Edit' : 'Add'}} board</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
   </div>
-</div>
+  <div class="modal-body">
+    <form [formGroup]="boardForm" action="Create board">
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="TODO">
+        <label for="floatingName">Name</label>
+        <div>
+          <!-- TODO: Add message depending on the error -->
+          <ng-container *ngIf="name.dirty || name.touched">
+            <small class="text-danger" *ngIf="!name.valid">Type a valid name</small>
+            <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+            <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+          </ng-container>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" (click)="saveBoard()">Save</button>
+  </div>
+</ng-template>

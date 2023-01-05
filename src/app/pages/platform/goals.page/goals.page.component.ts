@@ -122,12 +122,15 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   getGoals(goals: Goal[], projectData: any) {
     const goalsRaw = goals;
     const sortedGoalsIds = projectData.goals ?? [];
-    const finalGoals = [];
+    const finalGoals: any[] = [];
 
     for (const goalInfo of sortedGoalsIds) {
       const goal = goalsRaw.find((g) => g.id === goalInfo.id);
       if (goal) finalGoals.push(goal);
     }
+
+    const restGoals = goalsRaw.filter((g) => !finalGoals.find((s) => s.id === g.id));
+    finalGoals.push(...restGoals);
 
     this.goals = finalGoals;
     this.managementService.log('Goals final', this.goals);

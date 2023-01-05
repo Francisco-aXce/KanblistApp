@@ -40,6 +40,13 @@ export class GoalPageComponent implements OnInit {
     tap((data) => {
       this.managementService.log('GoalPageComponent', 'projectObs', data);
 
+      if (!this.boardsUnsub) {
+        this.managementService.log('setting boards unsub');
+        this.boardsUnsub = this.fireService.onSnapshotCol$(`${data.goal.path}/boards`,
+          async (boards: any[]) => await this.getBoards(boards),
+          [this.fireService.where('active', '==', true)]);
+      }
+
       this.goalInfo = {
         path: data.goal.path,
       };
@@ -77,14 +84,6 @@ export class GoalPageComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    firstValueFrom(this.projectObs).then(({ goal }) => {
-      if (!this.boardsUnsub) {
-        this.managementService.log('setting boards unsub');
-        this.boardsUnsub = this.fireService.onSnapshotCol$(`${goal.path}/boards`,
-          (boards: any[]) => this.getBoards(boards, goal),
-          [this.fireService.where('active', '==', true)]);
-      }
-    });
   }
 
   ngOnDestroy(): void {
@@ -93,15 +92,18 @@ export class GoalPageComponent implements OnInit {
 
   // TODO: Add type
   // FIXME: Repetitive code with goals
-  getBoards(boards: any[], goal: any) {
+  async getBoards(boards: any[]) {
     const boardsRaw = boards;
-    const sortedBoardsIds = goal.boards ?? [];
-    const finalBoards = [];
+    const obsData = await firstValueFrom(this.projectObs);
+    const sortedBoardsIds = obsData.goal.boards ?? [];
+    const finalBoards: any[] = [];
 
     for (const boardInfo of sortedBoardsIds) {
       const board = boardsRaw.find((b) => b.id === boardInfo.id);
       if (board) finalBoards.push(board);
     }
+    const restBoards = boardsRaw.filter((b) => !finalBoards.find((s) => s.id === b.id));
+    finalBoards.push(...restBoards);
 
     this.boards = finalBoards;
     this.managementService.log('Boards final', this.boards);
@@ -132,7 +134,6 @@ export class GoalPageComponent implements OnInit {
     if (this.boardForm.invalid) return;
 
     await setTimeout(() => {
-      console.log('Board saved');
       this.modalService.dismissAll();
       this.editMode = false;
     }, 1000);

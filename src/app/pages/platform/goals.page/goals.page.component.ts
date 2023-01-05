@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { QuillConfig } from 'ngx-quill';
 import { ToastrService } from 'ngx-toastr';
-import { lastValueFrom, map, shareReplay, switchMap, tap } from 'rxjs';
+import { firstValueFrom, lastValueFrom, map, shareReplay, switchMap, tap } from 'rxjs';
 import { Options } from 'sortablejs';
 import { Goal } from 'src/app/models/projects.model';
 import { AuthService } from 'src/app/services/auth.service';
@@ -37,15 +37,8 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     switchMap((projectPath: string) => {
       return this.fireService.doc$(projectPath);
     }),
+    shareReplay(1),
     tap((projData: any) => {
-      if (!this.goalsUnsub && projData.goals) {
-        // this.goalsUnsub?.();
-        this.managementService.log('setting goals unsub');
-        this.goalsUnsub = this.fireService.onSnapshotCol$(`${projData.path}/goals`,
-          (goals: Goal[]) => this.getGoals(goals, projData.goals ?? []),
-          [this.fireService.where('active', '==', true)]);
-      }
-
       this.managementService.log('Project', projData);
 
       this.projectInfo = {
@@ -56,7 +49,6 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
         path: projData.path,
       };
     }),
-    shareReplay(1),
   );
 
 
@@ -111,6 +103,15 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    // In this case using promise with firstValueFrom seems to be better (faster) than using observable with first operator
+    firstValueFrom(this.projectObs).then((projectData: any) => {
+      if (!this.goalsUnsub) {
+        this.managementService.log('setting goals unsub');
+        this.goalsUnsub = this.fireService.onSnapshotCol$(`${projectData.path}/goals`,
+          (goals: Goal[]) => this.getGoals(goals, projectData),
+          [this.fireService.where('active', '==', true)]);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -118,14 +119,18 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   }
 
   // TODO: Fix types
-  getGoals(goals: Goal[], sortedGoalsIds: any[]) {
+  getGoals(goals: Goal[], projectData: any) {
+    const goalsRaw = goals;
+    const sortedGoalsIds = projectData.goals ?? [];
     const finalGoals = [];
+
     for (const goalInfo of sortedGoalsIds) {
-      const goal = goals.find((g) => g.id === goalInfo.id);
+      const goal = goalsRaw.find((g) => g.id === goalInfo.id);
       if (goal) finalGoals.push(goal);
     }
+
     this.goals = finalGoals;
-    this.managementService.log('Goals', goals);
+    this.managementService.log('Goals final', this.goals);
   }
 
   openGoalModal(goal: Goal) {

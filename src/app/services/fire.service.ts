@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   Firestore, doc, setDoc, serverTimestamp, DocumentReference, DocumentData, WithFieldValue,
   collection, query, QueryConstraint, CollectionReference, onSnapshot, docSnapshots, Unsubscribe, orderBy,
-  where, FieldPath, WhereFilterOp
+  where, FieldPath, WhereFilterOp, updateDoc
 } from '@angular/fire/firestore';
 import { ToastrService } from 'ngx-toastr';
 import { map } from 'rxjs';
@@ -55,6 +55,15 @@ export class FireService {
       ...data,
       updatedAt: this.timestamp,
       createdAt: this.timestamp,
+    });
+  }
+
+  updateDoc(doc: DocumentReference<unknown> | string, data: Partial<unknown>) {
+    const docRef = typeof doc === 'string' ? this.doc(doc) : doc;
+    return updateDoc(docRef, {
+      ...data,
+      updatedAt: this.timestamp,
+      // updatedBy:
     });
   }
 

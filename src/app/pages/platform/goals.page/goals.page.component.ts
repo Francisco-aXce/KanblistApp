@@ -35,19 +35,25 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       map((userData) => `users/${userData?.claims?.['user_id']}/projects/${projectId}`)
     )),
     switchMap((projectPath: string) => {
-      this.goalsUnsub?.();
-      this.goalsUnsub = this.fireService.onSnapshotCol$(`${projectPath}/goals`,
-        (goals: Goal[]) => this.getGoals(goals),
-        [this.fireService.orderBy('order', 'asc'), this.fireService.where('active', '==', true)])
-      return this.fireService.doc$(projectPath)
+      return this.fireService.doc$(projectPath);
     }),
     tap((projData: any) => {
+      if (!this.goalsUnsub && projData.goals) {
+        // this.goalsUnsub?.();
+        this.managementService.log('setting goals unsub');
+        this.goalsUnsub = this.fireService.onSnapshotCol$(`${projData.path}/goals`,
+          (goals: Goal[]) => this.getGoals(goals, projData.goals ?? []),
+          [this.fireService.where('active', '==', true)]);
+      }
+
       this.managementService.log('Project', projData);
+
       this.projectInfo = {
         id: projData.id,
         name: projData.name,
         description: projData.description,
         owner: projData.owner,
+        path: projData.path,
       };
     }),
     shareReplay(1),
@@ -88,8 +94,8 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
 
   goalsDndOptions: Options = {
     handle: '.handle',
-    onSort: (event) => {
-
+    onUpdate: () => {
+      this.sortGoals();
     },
   }
 
@@ -111,8 +117,14 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     this.goalsUnsub?.();
   }
 
-  getGoals(goals: Goal[]) {
-    this.goals = goals;
+  // TODO: Fix types
+  getGoals(goals: Goal[], sortedGoalsIds: any[]) {
+    const finalGoals = [];
+    for (const goalInfo of sortedGoalsIds) {
+      const goal = goals.find((g) => g.id === goalInfo.id);
+      if (goal) finalGoals.push(goal);
+    }
+    this.goals = finalGoals;
     this.managementService.log('Goals', goals);
   }
 
@@ -171,6 +183,17 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
         this.modalService.dismissAll();
       });
 
+  }
+
+  async sortGoals() {
+    const goalsToSet = this.goals.map((goal) => ({
+      id: goal.id,
+    }));
+
+    await this.fireService.updateDoc(this.projectInfo.path, {
+      goals: goalsToSet,
+    });
+    console.log('sorted');
   }
 
 }

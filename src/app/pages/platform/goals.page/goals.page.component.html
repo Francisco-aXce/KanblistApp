@@ -10,11 +10,9 @@
       <div class="card-body">
         <div class="d-flex flex-wrap justify-content-center gap-4" [sortablejs]="goals"
           [sortablejsOptions]="goalsDndOptions">
-          <ng-container *ngFor="let goal of goals">
-            <div>
-              <app-goal-card [data]="goal" [canPreview]="previewCallback"></app-goal-card>
-            </div>
-          </ng-container>
+          <div *ngFor="let goal of goals">
+            <app-goal-card [data]="goal" [canPreview]="previewCallback"></app-goal-card>
+          </div>
         </div>
         <div class="d-flex mt-4">
           <button type="button" class="btn btn-outline-secondary py-3 px-5 shadow mx-auto" (click)="addNewGoal()">

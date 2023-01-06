@@ -179,7 +179,6 @@ export class GoalPageComponent implements OnInit {
   // TODO: Add type
   onAddTask(board: any) {
     this.boardToEdit = board;
-    console.log('board', board);
 
     this.taskForm.reset();
     this.modalService.open(this.modalTask, { centered: true });

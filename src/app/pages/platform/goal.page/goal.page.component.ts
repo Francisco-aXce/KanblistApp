@@ -153,8 +153,15 @@ export class GoalPageComponent implements OnInit {
     }
   }
 
-  sortBoards() {
-    console.log('Sorting boards', this.data);
+  async sortBoards() {
+    const boardsToSet = this.boards.map((board) => ({
+      id: board.id,
+    }));
+
+    await this.fireService.updateDoc(this.data.goal.path, {
+      boards: boardsToSet,
+    });
+    this.managementService.log('sorted');
   }
 
 }

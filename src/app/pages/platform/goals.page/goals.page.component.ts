@@ -201,7 +201,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     await this.fireService.updateDoc(this.projectInfo.path, {
       goals: goalsToSet,
     });
-    console.log('sorted');
+    this.managementService.log('sorted');
   }
 
 }

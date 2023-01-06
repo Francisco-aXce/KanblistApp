@@ -3,10 +3,11 @@ import { Unsubscribe } from '@angular/fire/firestore';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { combineLatest, firstValueFrom } from 'rxjs';
+import { combineLatest, firstValueFrom, lastValueFrom } from 'rxjs';
 import { map, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Options } from 'sortablejs';
 import { AuthService } from 'src/app/services/auth.service';
+import { DataService } from 'src/app/services/data.service';
 import { FireService } from 'src/app/services/fire.service';
 import { ManagementService } from 'src/app/services/management.service';
 
@@ -22,7 +23,7 @@ export class GoalPageComponent implements OnInit {
   editMode = false;
   boardToEdit?: any;
 
-  goalInfo: any;
+  data: any;
   projectObs = this.route.params.pipe(
     switchMap(({ projectId, goalId }) => this.authService.userInfo$.pipe(
       map((user) => ({ projectId, goalId, claims: user?.claims, }))
@@ -47,9 +48,7 @@ export class GoalPageComponent implements OnInit {
           [this.fireService.where('active', '==', true)]);
       }
 
-      this.goalInfo = {
-        path: data.goal.path,
-      };
+      this.data = data;
     }),
   );
   boardsUnsub?: Unsubscribe;
@@ -81,6 +80,7 @@ export class GoalPageComponent implements OnInit {
     private fireService: FireService,
     private authService: AuthService,
     private managementService: ManagementService,
+    private dataService: DataService,
   ) { }
 
   ngOnInit(): void {
@@ -133,16 +133,28 @@ export class GoalPageComponent implements OnInit {
     this.boardForm.markAllAsTouched();
     if (this.boardForm.invalid) return;
 
-    await setTimeout(() => {
+    let success = false;
+    const finalData = {
+      name: this.name.value,
+    };
+
+    if (this.editMode) {
+      // TODO: Need update function
+    } else {
+      await lastValueFrom(this.dataService.createBoard(this.data.project, this.data.goal, finalData))
+        .then(() => {
+          success = true;
+        });
+    }
+
+    if (success) {
       this.modalService.dismissAll();
       this.editMode = false;
-    }, 1000);
-
-    // this.modalService.dismissAll();
+    }
   }
 
   sortBoards() {
-    console.log('Sorting boards', this.goalInfo);
+    console.log('Sorting boards', this.data);
   }
 
 }

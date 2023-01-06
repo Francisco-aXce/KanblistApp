@@ -71,6 +71,27 @@ export class DataService {
       .pipe(
         tap(() => this.toastr.success('Goal saved correctly', 'Success')),
         catchError((error) => {
+          this.toastr.error('Error while saving goal', 'Error');
+          this.managementService.error(error);
+          return of(null);
+        }),
+      );
+  }
+
+  // TODO: Add and fix types
+  createBoard(project: any, goal: any, boardData: any) {
+    const body = {
+      projectInfo: {
+        owner: project.owner,
+        id: project.id,
+      },
+      goalId: goal.id,
+      boardData,
+    };
+    return this.http.post(this.baseUrlProjects + '/createBoard', body, { responseType: 'json' })
+      .pipe(
+        tap(() => this.toastr.success('Board saved correctly', 'Success')),
+        catchError((error) => {
           this.toastr.error('Error while saving board', 'Error');
           this.managementService.error(error);
           return of(null);

@@ -1,4 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Options } from 'sortablejs';
+import { FireService } from 'src/app/services/fire.service';
+import { ManagementService } from 'src/app/services/management.service';
 
 @Component({
   selector: 'app-board',
@@ -7,16 +10,44 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class BoardComponent implements OnInit {
 
+  tasks: any[] = [];
+  board: any = {};
+
   // TODO: Add type
-  @Input() data: any;
+  @Input() set data(data: any) {
+    this.tasks = data.tasks ? [...data.tasks] : [];
+    this.board = data;
+  };
 
   @Input() canAddTask?: Function;
   @Input() canEditBoard?: Function;
   @Input() canDeleteBoard?: Function;
 
-  constructor() { }
+  tasksDndOptions: Options = {
+    direction: 'vertical',
+    group: {
+      name: 'tasks',
+    },
+    onSort: (event: any) => {
+      this.sortTasks();
+    },
+  }
+
+  constructor(
+    private fireService: FireService,
+    private managementService: ManagementService,
+  ) { }
 
   ngOnInit(): void {
+  }
+
+  async sortTasks() {
+    const tasksToSet = this.tasks;
+
+    await this.fireService.updateDoc(this.board.path, {
+      tasks: tasksToSet,
+    });
+    this.managementService.log('sorted');
   }
 
 }

@@ -5,27 +5,28 @@
         (touchstart)="$event.stopPropagation()">
         <i class="bi bi-grip-vertical"></i>
       </button>
-      <div class="fw-bold my-auto">{{data.name ?? 'Board name'}}</div>
+      <div class="fw-bold my-auto">{{board.name ?? 'Board name'}}</div>
     </div>
     <div ngbDropdown #dropBoard="ngbDropdown">
       <button type="button" class="btn btn-light" (click)="$event.stopPropagation(); dropBoard.open();">
         <i class="bi bi-three-dots m-0 h4"></i>
       </button>
       <div ngbDropdownMenu aria-labelledby="dropBoard">
-        <button ngbDropdownItem (click)="canEditBoard?.(data)">Edit</button>
+        <button ngbDropdownItem (click)="canEditBoard?.(board)">Edit</button>
         <hr class="dropdown-divider">
         <button ngbDropdownItem class="btn btn-outline-danger rounded-0" (click)="canDeleteBoard?.()">Delete</button>
       </div>
     </div>
   </div>
   <div class="card-body bg-secondary-custom-1 pt-0 1 pb-2">
-    <div class="d-flex flex-column px-1 gap-2 board-content my-3">
-      <ng-container *ngFor="let i of [1,2,3,4,5,6,7,8,9,0,1,2,3,4,5]">
-        <app-task></app-task>
-      </ng-container>
+    <div class="d-flex flex-column px-1 gap-2 board-content my-3 w-100" [sortablejs]="tasks"
+      [sortablejsOptions]="tasksDndOptions">
+      <div *ngFor="let task of tasks">
+        <app-task [data]="task"></app-task>
+      </div>
     </div>
     <div class="d-flex row gap-2">
-      <button class="btn btn-light bg-secondary-custom-1 text-start" *ngIf="canAddTask" (click)="canAddTask()">
+      <button class="btn btn-light bg-secondary-custom-1 text-start" *ngIf="canAddTask" (click)="canAddTask(board)">
         <i class="bi bi-plus-lg mx-1 opacity-50"></i>
         <span class="opacity-50">Add task</span>
       </button>

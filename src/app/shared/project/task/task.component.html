@@ -1,8 +1,8 @@
 <div class="task d-flex justify-content-between bg-body shadow-sm">
   <div class="ms-1 my-2 fs-6">
-    Task namekskladslka sakdjaslkdjlksad kasdjkaslasdnsa asdkasjkasjklda sakjjdslkd
+    {{data.name ?? 'Task name'}}
   </div>
-  <button type="button" class="btn btn-light py-0" data-bs-toggle="modal" data-bs-target="#addEditTask">
+  <button type="button" class="btn btn-light py-0 rounded-0" data-bs-toggle="modal" data-bs-target="#addEditTask">
     <i class="bi bi-pencil-fill opacity-50"></i>
   </button>
 </div>

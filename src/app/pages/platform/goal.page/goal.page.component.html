@@ -2,8 +2,8 @@
   <app-project-header [projectName]="dbData.project.name + ' / ' + dbData.goal.name"
     [ownerName]="dbData.project.owner.name"></app-project-header>
   <div class="container-boards" [sortablejs]="boards" [sortablejsOptions]="boardsDndOptions">
-    <app-board class="board-drag" *ngFor="let board of boards" [data]="board"
-      [canEditBoard]="editBoardCallback"></app-board>
+    <app-board class="board-drag" *ngFor="let board of boards" [data]="board" [canEditBoard]="editBoardCallback"
+      [canAddTask]="addTaskCallback"></app-board>
     <div class="add-board">
       <button class="btn btn-light bg-secondary-custom-1 text-start" type="button" (click)="onCreateBoard()">
         <i class="bi bi-plus-lg mx-1 opacity-50"></i>
@@ -38,5 +38,33 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
     <button type="button" class="btn btn-primary" (click)="saveBoard()">Save</button>
+  </div>
+</ng-template>
+
+<!-- Modal add/edit task -->
+<ng-template #modalTask let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">{{editMode ? 'Edit' : 'Add'}} task</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="taskForm" action="Create board">
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="TODO">
+        <label for="floatingName">Name</label>
+        <div>
+          <!-- TODO: Add message depending on the error -->
+          <ng-container *ngIf="taskName.dirty || taskName.touched">
+            <small class="text-danger" *ngIf="!taskName.valid">Type a valid name</small>
+            <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+            <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+          </ng-container>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" (click)="saveTask()">Save</button>
   </div>
 </ng-template>

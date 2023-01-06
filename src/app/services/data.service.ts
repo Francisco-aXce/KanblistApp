@@ -99,6 +99,28 @@ export class DataService {
       );
   }
 
+  // TODO: Add and fix types
+  createTask(project: any, goal: any, board: any, taskData: any) {
+    const body = {
+      projectInfo: {
+        owner: project.owner,
+        id: project.id,
+      },
+      goalId: goal.id,
+      boardId: board.id,
+      taskData,
+    };
+    return this.http.post(this.baseUrlProjects + '/createTask', body, { responseType: 'json' })
+      .pipe(
+        tap(() => this.toastr.success('Task saved correctly', 'Success')),
+        catchError((error) => {
+          this.toastr.error('Error while saving task', 'Error');
+          this.managementService.error(error);
+          return of(null);
+        }),
+      );
+  }
+
   // FIXME: Repetitive code
   async getProjectDesc(owner: string, projectId: string, refresh = false) {
     if (this.projectsDescs[projectId] && !refresh) return this.projectsDescs[projectId];

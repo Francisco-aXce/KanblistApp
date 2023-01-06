@@ -19,6 +19,7 @@ import { ManagementService } from 'src/app/services/management.service';
 export class GoalPageComponent implements OnInit {
 
   @ViewChild('modalBoard') modalBoard!: HTMLElement;
+  @ViewChild('modalTask') modalTask!: HTMLElement;
 
   editMode = false;
   boardToEdit?: any;
@@ -62,11 +63,22 @@ export class GoalPageComponent implements OnInit {
 
   get name() { return this.boardForm.get('name') as UntypedFormControl; }
 
+  readonly taskForm = new UntypedFormGroup({
+    name: new UntypedFormControl('', [Validators.required, Validators.minLength(1), Validators.maxLength(40)]),
+  });
+
+  get taskName() { return this.taskForm.get('name') as UntypedFormControl; }
+
   editBoardCallback = (board: any) => {
     this.onEditBoard(board);
   };
 
+  addTaskCallback = (board: any) => {
+    this.onAddTask(board);
+  };
+
   boardsDndOptions: Options = {
+    direction: 'horizontal',
     handle: '.handle',
     draggable: '.board-drag',
     onUpdate: () => {
@@ -162,6 +174,28 @@ export class GoalPageComponent implements OnInit {
       boards: boardsToSet,
     });
     this.managementService.log('sorted');
+  }
+
+  // TODO: Add type
+  onAddTask(board: any) {
+    this.boardToEdit = board;
+    console.log('board', board);
+
+    this.taskForm.reset();
+    this.modalService.open(this.modalTask, { centered: true });
+  };
+
+  async saveTask() {
+    this.taskForm.markAllAsTouched();
+    if (this.taskForm.invalid) return;
+
+    const finalData = {
+      name: this.taskName.value,
+    };
+
+    await lastValueFrom(this.dataService.createTask(this.data.project, this.data.goal, this.boardToEdit, finalData));
+    this.modalService.dismissAll();
+    this.boardToEdit = undefined;
   }
 
 }

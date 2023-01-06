@@ -22,6 +22,7 @@ import { TaskComponent } from './project/task/task.component';
 import { DataService } from '../services/data.service';
 import { UserInfoComponent } from './global/user-info/user-info.component';
 import { GoalCardComponent } from './project/goal-card/goal-card.component';
+import { SortablejsModule } from 'ngx-sortablejs';
 
 
 @NgModule({
@@ -47,6 +48,7 @@ import { GoalCardComponent } from './project/goal-card/goal-card.component';
     RouterModule,
     ReactiveFormsModule,
     NgbDropdownModule,
+    SortablejsModule,
     // QuillModule.forRoot(),
   ],
   exports: [

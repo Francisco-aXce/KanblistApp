@@ -22,7 +22,7 @@
     <div class="d-flex flex-column px-1 gap-2 board-content my-3 w-100" [sortablejs]="tasks"
       [sortablejsOptions]="tasksDndOptions">
       <div *ngFor="let task of tasks">
-        <app-task [data]="task"></app-task>
+        <app-task [data]="task" [board]="board" [canEdit]="canEditTask"></app-task>
       </div>
     </div>
     <div class="d-flex row gap-2">

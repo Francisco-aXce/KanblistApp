@@ -23,6 +23,7 @@ export class GoalPageComponent implements OnInit {
 
   editMode = false;
   boardToEdit?: any;
+  taskToEdit?: any;
 
   data: any;
   projectObs = this.route.params.pipe(
@@ -75,6 +76,10 @@ export class GoalPageComponent implements OnInit {
 
   addTaskCallback = (board: any) => {
     this.onAddTask(board);
+  };
+
+  editTaskCallback = (board: any, task: any) => {
+    this.onEditTask(board, task);
   };
 
   boardsDndOptions: Options = {
@@ -188,13 +193,31 @@ export class GoalPageComponent implements OnInit {
     this.taskForm.markAllAsTouched();
     if (this.taskForm.invalid) return;
 
-    const finalData = {
+    const finalData: any = {
       name: this.taskName.value,
     };
 
-    await lastValueFrom(this.dataService.createTask(this.data.project, this.data.goal, this.boardToEdit, finalData));
+    if (this.editMode) {
+      if (Object.keys(finalData).every(key => finalData[key] === this.taskToEdit?.[key])) return;
+      await lastValueFrom(this.dataService.editTask(this.data.project, this.data.goal, this.boardToEdit, this.taskToEdit, finalData));
+    } else {
+      await lastValueFrom(this.dataService.createTask(this.data.project, this.data.goal, this.boardToEdit, finalData));
+    }
+
     this.modalService.dismissAll();
     this.boardToEdit = undefined;
+    this.taskToEdit = undefined;
+    this.editMode = false;
+  }
+
+  onEditTask(board: any, task: any) {
+    this.boardToEdit = board;
+    this.taskToEdit = task;
+    this.editMode = true;
+
+    this.taskForm.reset();
+    this.modalService.open(this.modalTask, { centered: true });
+    this.taskForm.patchValue(task);
   }
 
 }

@@ -20,6 +20,7 @@ export class BoardComponent implements OnInit {
   };
 
   @Input() canAddTask?: Function;
+  @Input() canEditTask?: Function;
   @Input() canEditBoard?: Function;
   @Input() canDeleteBoard?: Function;
 

@@ -9,6 +9,8 @@ export class TaskComponent implements OnInit {
 
   // TODO: Add type
   @Input() data: any;
+  @Input() board: any;
+  @Input() canEdit?: Function;
 
   constructor() { }
 

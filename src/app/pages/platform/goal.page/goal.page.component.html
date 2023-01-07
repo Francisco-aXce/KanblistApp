@@ -3,7 +3,7 @@
     [ownerName]="dbData.project.owner.name"></app-project-header>
   <div class="container-boards" [sortablejs]="boards" [sortablejsOptions]="boardsDndOptions">
     <app-board class="board-drag" *ngFor="let board of boards" [data]="board" [canEditBoard]="editBoardCallback"
-      [canAddTask]="addTaskCallback"></app-board>
+      [canAddTask]="addTaskCallback" [canEditTask]="editTaskCallback"></app-board>
     <div class="add-board">
       <button class="btn btn-light bg-secondary-custom-1 text-start" type="button" (click)="onCreateBoard()">
         <i class="bi bi-plus-lg mx-1 opacity-50"></i>

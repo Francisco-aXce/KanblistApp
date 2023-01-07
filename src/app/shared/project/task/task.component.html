@@ -2,7 +2,7 @@
   <div class="ms-1 my-2 fs-6">
     {{data.name ?? 'Task name'}}
   </div>
-  <button type="button" class="btn btn-light py-0 rounded-0" data-bs-toggle="modal" data-bs-target="#addEditTask">
+  <button type="button" class="btn btn-light py-0 rounded-0" *ngIf="canEdit" (click)="canEdit(board, data)">
     <i class="bi bi-pencil-fill opacity-50"></i>
   </button>
 </div>

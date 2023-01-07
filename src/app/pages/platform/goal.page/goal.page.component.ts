@@ -156,7 +156,10 @@ export class GoalPageComponent implements OnInit {
     };
 
     if (this.editMode) {
-      // TODO: Need update function
+      await lastValueFrom(this.dataService.editBoard(this.data.project, this.data.goal, this.boardToEdit, finalData))
+        .then(() => {
+          success = true;
+        });
     } else {
       await lastValueFrom(this.dataService.createBoard(this.data.project, this.data.goal, finalData))
         .then(() => {

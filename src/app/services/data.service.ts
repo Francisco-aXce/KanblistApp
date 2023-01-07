@@ -99,6 +99,27 @@ export class DataService {
       );
   }
 
+  editBoard(project: any, goal: any, board: any, boardData: any) {
+    const body = {
+      projectInfo: {
+        owner: project.owner,
+        id: project.id,
+      },
+      goalId: goal.id,
+      boardId: board.id,
+      boardData,
+    };
+    return this.http.post(this.baseUrlProjects + '/editBoard', body, { responseType: 'json' })
+      .pipe(
+        tap(() => this.toastr.success('Board saved correctly', 'Success')),
+        catchError((error) => {
+          this.toastr.error('Error while saving board', 'Error');
+          this.managementService.error(error);
+          return of(null);
+        }),
+      );
+  }
+
   // TODO: Add and fix types
   createTask(project: any, goal: any, board: any, taskData: any) {
     const body = {

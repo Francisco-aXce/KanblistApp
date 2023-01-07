@@ -29,6 +29,8 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   goals: Goal[] = [];
   goalToPreview: Goal | undefined;
 
+  goalsLoaded = false;
+
   projectInfo: any;
   projectObs = this.route.params.pipe(
     switchMap(({ projectId }) => this.authService.userInfo$.pipe(
@@ -143,6 +145,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     finalGoals.push(...restGoals);
 
     this.goals = finalGoals;
+    this.goalsLoaded = true;
     this.managementService.log('Goals final', this.goals);
   }
 

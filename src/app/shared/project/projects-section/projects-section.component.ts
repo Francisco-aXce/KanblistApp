@@ -14,6 +14,7 @@ export class ProjectsSectionComponent implements OnInit {
   @Input() icon?: string;
   @Input() canAdd: Function | undefined;
   @Input() canPreview: Function | undefined;
+  @Input() loaded!: boolean;
 
   constructor() { }
 

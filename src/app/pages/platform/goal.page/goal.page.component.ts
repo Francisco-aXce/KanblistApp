@@ -25,6 +25,8 @@ export class GoalPageComponent implements OnInit {
   boardToEdit?: any;
   taskToEdit?: any;
 
+  boardsLoaded = false;
+
   data: any;
   projectObs = this.route.params.pipe(
     switchMap(({ projectId, goalId }) => this.authService.userInfo$.pipe(
@@ -123,6 +125,7 @@ export class GoalPageComponent implements OnInit {
     finalBoards.push(...restBoards);
 
     this.boards = finalBoards;
+    this.boardsLoaded = true;
     this.managementService.log('Boards final', this.boards);
   }
 

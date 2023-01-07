@@ -1,17 +1,34 @@
-<div *ngIf="(projectObs | async) as dbData">
+<div *ngIf="(projectObs | async) as dbData; else fullLoading">
   <app-project-header [projectName]="dbData.project.name + ' / ' + dbData.goal.name"
     [ownerName]="dbData.project.owner.name"></app-project-header>
   <div class="container-boards" [sortablejs]="boards" [sortablejsOptions]="boardsDndOptions">
-    <app-board class="board-drag" *ngFor="let board of boards" [data]="board" [canEditBoard]="editBoardCallback"
-      [canAddTask]="addTaskCallback" [canEditTask]="editTaskCallback"></app-board>
-    <div class="add-board">
-      <button class="btn btn-light bg-secondary-custom-1 text-start" type="button" (click)="onCreateBoard()">
-        <i class="bi bi-plus-lg mx-1 opacity-50"></i>
-        <span class="opacity-50">Add board</span>
-      </button>
-    </div>
+    <ng-container *ngIf="boardsLoaded; else loading">
+      <app-board class="board-drag" *ngFor="let board of boards" [data]="board" [canEditBoard]="editBoardCallback"
+        [canAddTask]="addTaskCallback" [canEditTask]="editTaskCallback"></app-board>
+      <div class="add-board">
+        <button class="btn btn-light bg-secondary-custom-1 text-start" type="button" (click)="onCreateBoard()">
+          <i class="bi bi-plus-lg mx-1 opacity-50"></i>
+          <span class="opacity-50">Add board</span>
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-template #loading>
+      <div class="d-flex justify-content-center align-content-center m-4">
+        <div class="spinner-border" role="status">
+        </div>
+      </div>
+    </ng-template>
+
   </div>
 </div>
+
+<ng-template #fullLoading>
+  <div class="d-flex justify-content-center align-content-center flex-wrap" style="width: 100vw; height: 100vh;">
+    <div class="spinner-border" role="status">
+    </div>
+  </div>
+</ng-template>
 
 <!-- Modal add/edit board -->
 <ng-template #modalBoard let-modal>

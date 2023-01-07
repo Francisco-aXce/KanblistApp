@@ -7,18 +7,26 @@
     <button class="btn btn-light" *ngIf="canAdd" (click)="canAdd()"><i class="bi bi-plus-lg"></i></button>
   </div>
   <div class="card-body">
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-      <ng-container *ngIf="projects.length; else noContent">
-        <ng-container *ngFor="let project of projects">
-          <div class="col">
-            <app-project-card [project]="project" [canPreview]="canPreview"></app-project-card>
-          </div>
+    <ng-container *ngIf="loaded; else loading">
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        <ng-container *ngIf="projects.length; else noContent">
+          <ng-container *ngFor="let project of projects">
+            <div class="col">
+              <app-project-card [project]="project" [canPreview]="canPreview"></app-project-card>
+            </div>
+          </ng-container>
         </ng-container>
-      </ng-container>
-      <ng-template #noContent>
-        <span>{{emptyMessage}}</span>
-      </ng-template>
+        <ng-template #noContent>
+          <span>{{emptyMessage}}</span>
+        </ng-template>
+      </div>
+    </ng-container>
+    <ng-template #loading>
+      <div class="d-flex align-content-center justify-content-center">
+        <div class="spinner-border" role="status">
+        </div>
+      </div>
+    </ng-template>
 
-    </div>
   </div>
 </div>

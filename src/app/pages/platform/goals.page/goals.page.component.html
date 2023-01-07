@@ -1,5 +1,5 @@
-<div class="container container-goals">
-  <ng-container *ngIf="(projectObs | async) as projectData">
+<div class="container container-goals" *ngIf="(projectObs | async) as projectData; else fullLoading">
+  <ng-container>
 
     <div class="pt-4">
       <app-project-header [projectName]="projectData.name" [ownerName]="projectData.owner.name"
@@ -10,9 +10,18 @@
       <div class="card-body">
         <div class="d-flex flex-wrap justify-content-center gap-4" [sortablejs]="goals"
           [sortablejsOptions]="goalsDndOptions">
-          <div *ngFor="let goal of goals">
-            <app-goal-card [data]="goal" [canPreview]="previewCallback"></app-goal-card>
-          </div>
+          <ng-container *ngIf="goalsLoaded; else loading">
+            <ng-container *ngIf="goals.length; else noGoals">
+              <div *ngFor="let goal of goals">
+                <app-goal-card [data]="goal" [canPreview]="previewCallback"></app-goal-card>
+              </div>
+            </ng-container>
+            <ng-template #noGoals>
+              <div>
+                <p class="mb-1">No goals yet, add some</p>
+              </div>
+            </ng-template>
+          </ng-container>
         </div>
         <div class="d-flex mt-4">
           <button type="button" class="btn btn-outline-secondary py-3 px-5 shadow mx-auto" (click)="addNewGoal()">
@@ -22,10 +31,25 @@
 
       </div>
     </div>
-
   </ng-container>
 
+  <ng-template #loading>
+    <div class="d-flex align-content-center justify-content-center">
+      <div class="spinner-border" role="status">
+      </div>
+    </div>
+  </ng-template>
+
 </div>
+
+<ng-template #fullLoading>
+  <div class="position-fixed d-flex align-content-center justify-content-center flex-wrap"
+    style="width: 100vw; height: 100vh;">
+    <div class="spinner-border" role="status">
+    </div>
+  </div>
+</ng-template>
+
 
 <!-- Modal goal preview -->
 <ng-template #modalGoalPreview let-modal>

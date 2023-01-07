@@ -1,8 +1,8 @@
 <div class="container pt-10">
 
   <section>
-    <app-projects-section [canAdd]="newPCallback" [canPreview]="previewPCallback" [projects]="projects"
-      [icon]="'bi bi-person-fill'" [sectionName]="'Your projects'"></app-projects-section>
+    <app-projects-section [loaded]="projectsLoaded" [canAdd]="newPCallback" [canPreview]="previewPCallback"
+      [projects]="projects" [icon]="'bi bi-person-fill'" [sectionName]="'Your projects'"></app-projects-section>
   </section>
 
   <!-- TODO: Shared system -->

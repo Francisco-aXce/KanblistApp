@@ -25,6 +25,8 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
 
   projectToPreview: any | undefined;
 
+  projectsLoaded = false;
+
   @ViewChild('modalNewProject') modalNewProject!: HTMLElement;
   @ViewChild('modalProjectPreview') modalProjectPreview!: HTMLElement;
 
@@ -99,7 +101,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
 
         this.projectsUnsub?.();
         this.projectsUnsub = this.fireService.onSnapshotCol$(`users/${userId}/projects`,
-          (docs: Project[]) => this.getProjects(userId, docs),
+          (docs: Project[]) => this.getProjects(docs),
           [this.fireService.orderBy('createdAt', 'desc'), this.fireService.where('active', '==', true)]);
 
       }),
@@ -116,8 +118,9 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
     this.projectsUnsub?.();
   }
 
-  private async getProjects(userId: string, projects: Project[]) {
+  private async getProjects(projects: Project[]) {
     this.projects = projects;
+    this.projectsLoaded = true;
     this.managementService.log('Projects: ', this.projects);
   }
 

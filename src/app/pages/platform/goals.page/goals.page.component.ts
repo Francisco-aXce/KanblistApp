@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { QuillConfig } from 'ngx-quill';
 import { ToastrService } from 'ngx-toastr';
-import { firstValueFrom, lastValueFrom, map, shareReplay, switchMap, tap } from 'rxjs';
+import { combineLatest, firstValueFrom, lastValueFrom, map, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { Options } from 'sortablejs';
 import { Goal } from 'src/app/models/projects.model';
 import { AuthService } from 'src/app/services/auth.service';
@@ -33,13 +33,28 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   loadingPreview = false;
   loadingSave = false;
 
+  projOwner: any;
+
   projectInfo: any;
   projectObs = this.route.params.pipe(
     switchMap(({ projectId }) => this.authService.userInfo$.pipe(
       map((userData) => `users/${userData?.claims?.['user_id']}/projects/${projectId}`)
     )),
     switchMap((projectPath: string) => {
-      return this.fireService.doc$(projectPath);
+      return this.fireService.doc$(projectPath).pipe(
+        switchMap((projectData) => {
+          if (this.projOwner) {
+            return of({ ...projectData, owner: this.projOwner });
+          }
+          return this.dataService.getUserInfo(projectData.owner.id).pipe(
+            map((ownerData) => {
+              this.projOwner = ownerData;
+              return { ...projectData, owner: ownerData };
+            }),
+            take(1),
+          )
+        }),
+      )
     }),
     shareReplay(1),
     tap((projData: any) => {

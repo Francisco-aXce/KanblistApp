@@ -2,8 +2,7 @@
   <ng-container>
 
     <div class="pt-4">
-      <app-project-header [projectName]="projectData.name" [ownerName]="projectData.owner.name"
-        [canEdit]="editProjCallback"></app-project-header>
+      <app-project-header [projectData]="projectData" [canEdit]="editProjCallback"></app-project-header>
     </div>
 
     <div class="card my-4 shadow">

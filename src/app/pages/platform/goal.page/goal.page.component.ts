@@ -3,8 +3,8 @@ import { Unsubscribe } from '@angular/fire/firestore';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { combineLatest, firstValueFrom, lastValueFrom } from 'rxjs';
-import { map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, firstValueFrom, lastValueFrom, of } from 'rxjs';
+import { map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 import { Options } from 'sortablejs';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -29,6 +29,8 @@ export class GoalPageComponent implements OnInit {
   loadingPreview = false;
   loadingSave = false;
 
+  projOwner: any;
+
   data: any;
   projectObs = this.route.params.pipe(
     switchMap(({ projectId, goalId }) => this.authService.userInfo$.pipe(
@@ -37,7 +39,20 @@ export class GoalPageComponent implements OnInit {
     switchMap(({ projectId, goalId, claims }) => {
       const projectPath = `users/${claims?.['user_id']}/projects/${projectId}`;
       return combineLatest([
-        this.fireService.doc$(projectPath),
+        this.fireService.doc$(projectPath).pipe(
+          switchMap((projectData) => {
+            if (this.projOwner) {
+              return of({ ...projectData, owner: this.projOwner });
+            }
+            return this.dataService.getUserInfo(projectData.owner.id).pipe(
+              map((ownerData) => {
+                this.projOwner = ownerData;
+                return { ...projectData, owner: ownerData };
+              }),
+              take(1),
+            )
+          }),
+        ),
         this.fireService.doc$(`${projectPath}/goals/${goalId}`),
       ]).pipe(
         map(([project, goal]) => ({ project, goal, claims })),

@@ -1,6 +1,5 @@
 <div *ngIf="(projectObs | async) as dbData; else fullLoading">
-  <app-project-header [projectName]="dbData.project.name + ' / ' + dbData.goal.name"
-    [ownerName]="dbData.project.owner.name"></app-project-header>
+  <app-project-header [projectData]="dbData.project"></app-project-header>
   <div class="container-boards" [sortablejs]="boards" [sortablejsOptions]="boardsDndOptions">
     <ng-container *ngIf="boardsLoaded; else loading">
       <app-board class="board-drag" *ngFor="let board of boards" [data]="board" [canEditBoard]="editBoardCallback"

@@ -7,9 +7,15 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class ProjectHeaderComponent implements OnInit {
 
-  @Input() projectName: string = 'Project name';
-  @Input() ownerName: string = 'Project owner';
+  @Input() set projectData(value: any) {
+    this.data = value;
+    if (!value.owner.photo) {
+      this.data.owner.photo = './../../../../assets/nouser.svg';
+    }
+  };
   @Input() canEdit?: Function;
+
+  data: any;
 
   constructor() { }
 

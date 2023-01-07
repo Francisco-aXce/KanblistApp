@@ -195,7 +195,6 @@ export class DataService {
     return this.http.get(this.baseUrlUsers + '/info/' + uid, { responseType: 'json' })
       .pipe(
         catchError((error) => {
-          this.toastr.error('Error while saving task', 'Error');
           this.managementService.error(error);
           return of(null);
         }),

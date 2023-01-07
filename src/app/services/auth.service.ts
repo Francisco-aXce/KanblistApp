@@ -45,7 +45,7 @@ export class AuthService {
   async loginWithEmailAndPassword(email: string, password: string) {
     try {
       await signInWithEmailAndPassword(this.auth, email, password)
-        .then((user) => console.log('user: ', user));
+        .then((user) => this.managementService.log('user: ', user));
       this.toastrService.success('Logged in successfully!');
     } catch (error) {
       this.toastrService.error('Please check if email and password are correct', 'Login error');
@@ -56,7 +56,7 @@ export class AuthService {
   async loginWithGoogle() {
     try {
       await signInWithPopup(this.auth, new GoogleAuthProvider())
-        .then((user) => console.log('user: ', user));
+        .then((user) => this.managementService.log('user: ', user));
       this.router.navigateByUrl(Constants.DEFAULT_REDIRECT_LOGIN);
       this.toastrService.success('Logged in successfully!');
     } catch (error) {

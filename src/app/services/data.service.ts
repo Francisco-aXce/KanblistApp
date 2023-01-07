@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ProjectCreation } from '../models/projects.model';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, Observable, of, tap } from 'rxjs';
 import { ManagementService } from './management.service';
 import { defaultImage } from 'src/assets/Projects/valid-images.project';
 import { StorageService } from './storage.service';
@@ -12,6 +12,7 @@ export class DataService {
 
   // FIXME: This is a temporary solution to call the APIs
   baseUrlProjects = 'http://localhost:5001/kanb-list/us-central1/apiprojects/api/v1';
+  baseUrlUsers = 'http://localhost:5001/kanb-list/us-central1/apiusers/api/v1';
 
   private projectsDescs: { [key: string]: string } = {};
   private goalsDescs: { [key: string]: string } = {};
@@ -188,6 +189,17 @@ export class DataService {
 
   get defaultProjImage() {
     return defaultImage;
+  }
+
+  getUserInfo(uid: string): Observable<any> {
+    return this.http.get(this.baseUrlUsers + '/info/' + uid, { responseType: 'json' })
+      .pipe(
+        catchError((error) => {
+          this.toastr.error('Error while saving task', 'Error');
+          this.managementService.error(error);
+          return of(null);
+        }),
+      );
   }
 
   // #endregion

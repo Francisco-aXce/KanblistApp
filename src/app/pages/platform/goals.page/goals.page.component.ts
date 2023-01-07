@@ -73,11 +73,21 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   get projectDescription() { return this.projectForm.get('description') as UntypedFormControl; }
 
   previewCallback = (goal: Goal) => {
+    const goalIndex = this.goals.findIndex((g) => g.id === goal.id);
+    if (goalIndex < 0) return;
     if (!goal.description) {
-      const goalIndex = this.goals.findIndex((g) => g.id === goal.id);
-      if (goalIndex < 0) return;
       this.storageService.getBlobText(`${goal.path}/description.json`)
         .then((description: { text: string, success: boolean, error?: any }) => this.goals[goalIndex].description = description.text)
+    }
+    if (Object.keys(goal.attendant).length <= 1) {
+      lastValueFrom(this.dataService.getUserInfo(goal.attendant.id))
+        .then((attendantInfo) => {
+          if (!attendantInfo) return;
+          this.goals[goalIndex].attendant = attendantInfo;
+        })
+        .catch((error) => {
+          this.managementService.log('Error getting attendant info', error);
+        });
     }
     this.openGoalModal(goal);
   }

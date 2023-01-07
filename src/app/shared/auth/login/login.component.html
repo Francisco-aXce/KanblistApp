@@ -1,6 +1,11 @@
 <div class="d-inline-block">
-  <form [formGroup]="loginForm" action="Login" (ngSubmit)="onSubmitLogin()">
-    <p class="text-center fs-2 fw-semibold">Login</p>
+  <p class="text-center fs-2 fw-semibold">Log in</p>
+  <div>
+    <p class="h4 text-center">🚧 Work in progress 🚧</p>
+    <p class="text-break text-center">Working in other log in methods, for now you can use <b>google</b> pressing the
+      botton below</p>
+  </div>
+  <!-- <form [formGroup]="loginForm" action="Login" (ngSubmit)="onSubmitLogin()">
     <div class="form-floating mb-3">
       <input type="email" class="form-control" formControlName="email" id="floatingEmail"
         placeholder="something@example.com">
@@ -28,9 +33,9 @@
     <div class="d-flex mt-3">
       <button type="submit" class="btn btn-success">Submit</button>
     </div>
-  </form>
+  </form> -->
   <p class="text-center mt-2 fw-semibold text-secondary">Or</p>
-  <div class="d-flex">
+  <div class="d-flex justify-content-center">
     <button type="button" class="btn btn-outline-success" (click)="authService.loginWithGoogle()">
       <i class="bi bi-google"></i>
       <span class="ms-1">Log in with Google</span>

@@ -26,13 +26,14 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   projectToPreview: any | undefined;
 
   projectsLoaded = false;
+  loadingSave = false;
 
   @ViewChild('modalNewProject') modalNewProject!: HTMLElement;
   @ViewChild('modalProjectPreview') modalProjectPreview!: HTMLElement;
 
   readonly newPCallback = () => {
     this.projectForm.reset();
-    this.modalService.open(this.modalNewProject, { centered: true, size: 'xl' });
+    this.modalService.open(this.modalNewProject, { centered: true, size: 'xl', backdrop: 'static', keyboard: false });
   };
 
   readonly previewPCallback = (project: any) => {
@@ -127,6 +128,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   async saveProject() {
     this.projectForm.markAllAsTouched();
     if (this.projectForm.invalid) return;
+    this.loadingSave = true;
 
     // Just to make sure a valid image is selected and to handle default selection
     if (!this.image.value || !validImages.includes(this.image.value)) this.projectForm.get('image')?.setValue(defaultImage);
@@ -141,6 +143,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
       .then(() => {
         this.modalService.dismissAll();
         this.projectForm.reset();
+        this.loadingSave = false;
       });
   }
 

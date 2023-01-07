@@ -34,27 +34,35 @@
 <ng-template #modalBoard let-modal>
   <div class="modal-header">
     <h4 class="modal-title">{{editMode ? 'Edit' : 'Add'}} board</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    <button type="button" class="btn-close" aria-label="Close" [disabled]="loadingSave"
+      (click)="modal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
-    <form [formGroup]="boardForm" action="Create board">
-      <div class="form-floating mb-3">
-        <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="TODO">
-        <label for="floatingName">Name</label>
-        <div>
-          <!-- TODO: Add message depending on the error -->
-          <ng-container *ngIf="name.dirty || name.touched">
-            <small class="text-danger" *ngIf="!name.valid">Type a valid name</small>
-            <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
-            <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
-          </ng-container>
+    <ng-container *ngIf="!loadingPreview; else loadingPrev">
+      <form [formGroup]="boardForm" action="Create board">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="TODO">
+          <label for="floatingName">Name</label>
+          <div>
+            <!-- TODO: Add message depending on the error -->
+            <ng-container *ngIf="name.dirty || name.touched">
+              <small class="text-danger" *ngIf="!name.valid">Type a valid name</small>
+              <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+              <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+            </ng-container>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </ng-container>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
-    <button type="button" class="btn btn-primary" (click)="saveBoard()">Save</button>
+    <button type="button" class="btn btn-light" [disabled]="loadingSave"
+      (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" [disabled]="loadingSave" (click)="saveBoard()">
+      <span *ngIf="loadingSave || loadingPreview" class="spinner-border spinner-border-sm" role="status"
+        aria-hidden="true"></span>
+      <span>{{loadingSave || loadingPreview ? 'Loading...' : 'Save'}}</span>
+    </button>
   </div>
 </ng-template>
 
@@ -62,26 +70,40 @@
 <ng-template #modalTask let-modal>
   <div class="modal-header">
     <h4 class="modal-title">{{editMode ? 'Edit' : 'Add'}} task</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    <button type="button" class="btn-close" aria-label="Close" [disabled]="loadingSave"
+      (click)="modal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
-    <form [formGroup]="taskForm" action="Create board">
-      <div class="form-floating mb-3">
-        <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="TODO">
-        <label for="floatingName">Name</label>
-        <div>
-          <!-- TODO: Add message depending on the error -->
-          <ng-container *ngIf="taskName.dirty || taskName.touched">
-            <small class="text-danger" *ngIf="!taskName.valid">Type a valid name</small>
-            <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
-            <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
-          </ng-container>
+    <ng-container *ngIf="!loadingPreview; else loadingPrev">
+      <form [formGroup]="taskForm" action="Create board">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="TODO">
+          <label for="floatingName">Name</label>
+          <div>
+            <!-- TODO: Add message depending on the error -->
+            <ng-container *ngIf="taskName.dirty || taskName.touched">
+              <small class="text-danger" *ngIf="!taskName.valid">Type a valid name</small>
+              <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+              <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+            </ng-container>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </ng-container>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
-    <button type="button" class="btn btn-primary" (click)="saveTask()">Save</button>
+    <button type="button" class="btn btn-light" [disabled]="loadingSave"
+      (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" [disabled]="loadingSave" (click)="saveTask()">
+      <span *ngIf="loadingSave || loadingPreview" class="spinner-border spinner-border-sm" role="status"
+        aria-hidden="true"></span>
+      <span>{{loadingSave || loadingPreview ? 'Loading...' : 'Save'}}</span>
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #loadingPrev>
+  <div class="d-flex justify-content-center align-items-center my-4" style="height: 100%;">
+    <div class="spinner-border" role="status"></div>
   </div>
 </ng-template>

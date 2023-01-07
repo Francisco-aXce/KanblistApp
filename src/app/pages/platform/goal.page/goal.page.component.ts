@@ -26,6 +26,8 @@ export class GoalPageComponent implements OnInit {
   taskToEdit?: any;
 
   boardsLoaded = false;
+  loadingPreview = false;
+  loadingSave = false;
 
   data: any;
   projectObs = this.route.params.pipe(
@@ -151,9 +153,9 @@ export class GoalPageComponent implements OnInit {
 
   async saveBoard() {
     this.boardForm.markAllAsTouched();
-    if (this.boardForm.invalid) return;
+    this.loadingSave = true;
+    if (this.boardForm.invalid || this.loadingPreview) return;
 
-    let success = false;
     const finalData = {
       name: this.name.value,
     };
@@ -161,19 +163,18 @@ export class GoalPageComponent implements OnInit {
     if (this.editMode) {
       await lastValueFrom(this.dataService.editBoard(this.data.project, this.data.goal, this.boardToEdit, finalData))
         .then(() => {
-          success = true;
+          this.modalService.dismissAll();
+          this.editMode = false;
         });
     } else {
       await lastValueFrom(this.dataService.createBoard(this.data.project, this.data.goal, finalData))
         .then(() => {
-          success = true;
+          this.modalService.dismissAll();
         });
     }
 
-    if (success) {
-      this.modalService.dismissAll();
-      this.editMode = false;
-    }
+    this.loadingSave = false;
+
   }
 
   async sortBoards() {
@@ -197,7 +198,8 @@ export class GoalPageComponent implements OnInit {
 
   async saveTask() {
     this.taskForm.markAllAsTouched();
-    if (this.taskForm.invalid) return;
+    this.loadingSave = true;
+    if (this.taskForm.invalid || this.loadingPreview) return;
 
     const finalData: any = {
       name: this.taskName.value,
@@ -205,15 +207,23 @@ export class GoalPageComponent implements OnInit {
 
     if (this.editMode) {
       if (Object.keys(finalData).every(key => finalData[key] === this.taskToEdit?.[key])) return;
-      await lastValueFrom(this.dataService.editTask(this.data.project, this.data.goal, this.boardToEdit, this.taskToEdit, finalData));
+      await lastValueFrom(this.dataService.editTask(this.data.project, this.data.goal, this.boardToEdit, this.taskToEdit, finalData))
+        .then(() => {
+          this.modalService.dismissAll();
+          this.boardToEdit = undefined;
+          this.taskToEdit = undefined;
+          this.editMode = false;
+        });
     } else {
-      await lastValueFrom(this.dataService.createTask(this.data.project, this.data.goal, this.boardToEdit, finalData));
+      await lastValueFrom(this.dataService.createTask(this.data.project, this.data.goal, this.boardToEdit, finalData)).
+        then(() => {
+          this.modalService.dismissAll();
+          this.boardToEdit = undefined;
+        });
     }
 
-    this.modalService.dismissAll();
-    this.boardToEdit = undefined;
-    this.taskToEdit = undefined;
-    this.editMode = false;
+    this.loadingSave = false;
+
   }
 
   onEditTask(board: any, task: any) {

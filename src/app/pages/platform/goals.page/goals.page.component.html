@@ -58,16 +58,18 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
-    <div class="mb-3">
-      <app-user-info [name]="goalToPreview?.attendant?.name" [tag]="'Attendant'"
-        [email]="goalToPreview?.attendant?.email"></app-user-info>
-    </div>
-    <!-- Asigned dropdown -->
-    <!-- TODO: Add users dropdown with actions needed -->
-    <!-- Content -->
-    <div>
-      <quill-view [format]="'json'" [content]="goalToPreview?.description"></quill-view>
-    </div>
+    <ng-container *ngIf="!loadingPreview; else loadingPrev">
+      <div class="mb-3">
+        <app-user-info [name]="goalToPreview?.attendant?.name" [tag]="'Attendant'"
+          [email]="goalToPreview?.attendant?.email"></app-user-info>
+      </div>
+      <!-- Asigned dropdown -->
+      <!-- TODO: Add users dropdown with actions needed -->
+      <!-- Content -->
+      <div>
+        <quill-view [format]="'json'" [content]="goalToPreview?.description"></quill-view>
+      </div>
+    </ng-container>
   </div>
   <!-- <div class="modal-footer">
     <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
@@ -78,36 +80,44 @@
 <ng-template #modalAddGoal let-modal>
   <div class="modal-header">
     <h4 class="modal-title">New Goal</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    <button type="button" class="btn-close" aria-label="Close" [disabled]="loadingSave"
+      (click)="modal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
-    <form [formGroup]="goalForm" action="Create project">
-      <div class="form-floating mb-3">
-        <input type="text" class="form-control" formControlName="name" id="floatingName"
-          placeholder="Product management">
-        <label for="floatingName">Name</label>
+    <ng-container *ngIf="!loadingPreview; else loadingPrev">
+      <form [formGroup]="goalForm" action="Create project">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" formControlName="name" id="floatingName"
+            placeholder="Product management">
+          <label for="floatingName">Name</label>
+          <div>
+            <!-- TODO: Add message depending on the error -->
+            <ng-container *ngIf="name.dirty || name.touched">
+              <small class="text-danger" *ngIf="!name.valid">Type a valid name</small>
+              <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+              <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+            </ng-container>
+          </div>
+        </div>
         <div>
-          <!-- TODO: Add message depending on the error -->
-          <ng-container *ngIf="name.dirty || name.touched">
-            <small class="text-danger" *ngIf="!name.valid">Type a valid name</small>
+          <quill-editor formControlName="description" [format]="quillConfig.format"></quill-editor>
+          <ng-container *ngIf="description.dirty || description.touched">
+            <small class="text-danger" *ngIf="!description.valid">Please provide a description</small>
             <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
             <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
           </ng-container>
         </div>
-      </div>
-      <div>
-        <quill-editor formControlName="description" [format]="quillConfig.format"></quill-editor>
-        <ng-container *ngIf="description.dirty || description.touched">
-          <small class="text-danger" *ngIf="!description.valid">Please provide a description</small>
-          <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
-          <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
-        </ng-container>
-      </div>
-    </form>
+      </form>
+    </ng-container>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
-    <button type="button" class="btn btn-primary" (click)="saveGoal()">Save</button>
+    <button type="button" class="btn btn-light" [disabled]="loadingSave"
+      (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" [disabled]="loadingSave" (click)="saveGoal()">
+      <span *ngIf="loadingSave || loadingPreview" class="spinner-border spinner-border-sm" role="status"
+        aria-hidden="true"></span>
+      <span>{{loadingSave || loadingPreview ? 'Loading...' : 'Save'}}</span>
+    </button>
   </div>
 </ng-template>
 
@@ -115,52 +125,67 @@
 <ng-template #modalEditProject let-modal>
   <div class="modal-header">
     <h4 class="modal-title">Edit project</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    <button type="button" class="btn-close" aria-label="Close" [disabled]="loadingSave"
+      (click)="modal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
-    <form [formGroup]="projectForm" action="Edit project">
-      <div class="form-floating mb-3">
-        <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="Delivery app">
-        <label for="floatingName">Name</label>
+    <ng-container *ngIf="!loadingPreview; else loadingPrev">
+      <form [formGroup]="projectForm" action="Edit project">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" formControlName="name" id="floatingName" placeholder="Delivery app">
+          <label for="floatingName">Name</label>
+          <div>
+            <!-- TODO: Add message depending on the error -->
+            <ng-container *ngIf="projectName.dirty || projectName.touched">
+              <small class="text-danger" *ngIf="!projectName.valid">Type a valid name</small>
+              <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
+              <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
+            </ng-container>
+          </div>
+        </div>
+        <!-- FIXME: Need to divide modals in components to avoid duplicate code and template, until that cant edit image -->
+        <!-- <div class="d-lg-flex flex-lg-row-reverse justify-content-lg-around mb-3">
+          <div>
+            <label for="project-image-select" class="text-nowrap d-block text-center">Select an image</label>
+            <input id="project-image-select" type="text" class="form-control" formControlName="image"
+              [ngbTypeahead]="search" (focus)="focus$.next($any($event).target.value)" placeholder="Search by name"
+              [editable]="false" />
+            <ng-container *ngIf="image.dirty || image.touched">
+              <small class="text-danger" *ngIf="!image.valid">Select a valid image</small>
+              <small class="text-danger" *ngIf="true">Don't forget the name</small>
+              <small class="text-danger" *ngIf="true">The name is too long</small>
+            </ng-container>
+          </div>
+          <div style="width: 30rem; max-width: 100%; min-height: 15rem;">
+            <img [src]="'./../../../../assets/Projects/'+(image.value ?? dataService.defaultProjImage)+'.webp'"
+              alt="Project image preview" class="w-100 shadow">
+          </div>
+        </div> -->
         <div>
-          <!-- TODO: Add message depending on the error -->
-          <ng-container *ngIf="projectName.dirty || projectName.touched">
-            <small class="text-danger" *ngIf="!projectName.valid">Type a valid name</small>
+          <quill-editor formControlName="description" [format]="quillConfig.format"></quill-editor>
+          <ng-container *ngIf="projectDescription.dirty || projectDescription.touched">
+            <small class="text-danger" *ngIf="!projectDescription.valid">Please provide a description</small>
             <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
             <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
           </ng-container>
         </div>
-      </div>
-      <!-- FIXME: Need to divide modals in components to avoid duplicate code and template, until that cant edit image -->
-      <!-- <div class="d-lg-flex flex-lg-row-reverse justify-content-lg-around mb-3">
-        <div>
-          <label for="project-image-select" class="text-nowrap d-block text-center">Select an image</label>
-          <input id="project-image-select" type="text" class="form-control" formControlName="image"
-            [ngbTypeahead]="search" (focus)="focus$.next($any($event).target.value)" placeholder="Search by name"
-            [editable]="false" />
-          <ng-container *ngIf="image.dirty || image.touched">
-            <small class="text-danger" *ngIf="!image.valid">Select a valid image</small>
-            <small class="text-danger" *ngIf="true">Don't forget the name</small>
-            <small class="text-danger" *ngIf="true">The name is too long</small>
-          </ng-container>
-        </div>
-        <div style="width: 30rem; max-width: 100%; min-height: 15rem;">
-          <img [src]="'./../../../../assets/Projects/'+(image.value ?? dataService.defaultProjImage)+'.webp'"
-            alt="Project image preview" class="w-100 shadow">
-        </div>
-      </div> -->
-      <div>
-        <quill-editor formControlName="description" [format]="quillConfig.format"></quill-editor>
-        <ng-container *ngIf="projectDescription.dirty || projectDescription.touched">
-          <small class="text-danger" *ngIf="!projectDescription.valid">Please provide a description</small>
-          <!-- <small class="text-danger" *ngIf="true">Don't forget the name</small> -->
-          <!-- <small class="text-danger" *ngIf="true">The name is too long</small> -->
-        </ng-container>
-      </div>
-    </form>
+      </form>
+    </ng-container>
+
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
-    <button type="button" class="btn btn-primary" (click)="saveProject()">Save</button>
+    <button type="button" class="btn btn-light" [disabled]="loadingSave"
+      (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" [disabled]="loadingSave || loadingPreview" (click)="saveProject()">
+      <span *ngIf="loadingSave || loadingPreview" class="spinner-border spinner-border-sm" role="status"
+        aria-hidden="true"></span>
+      <span>{{loadingSave || loadingPreview ? 'Loading...' : 'Save'}}</span>
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #loadingPrev>
+  <div class="d-flex justify-content-center align-items-center my-4" style="height: 100%;">
+    <div class="spinner-border" role="status"></div>
   </div>
 </ng-template>

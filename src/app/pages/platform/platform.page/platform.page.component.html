@@ -17,7 +17,8 @@
 <ng-template #modalNewProject let-modal>
   <div class="modal-header">
     <h4 class="modal-title">New project</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    <button type="button" class="btn-close" aria-label="Close" [disabled]="loadingSave"
+      (click)="modal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
     <form [formGroup]="projectForm" action="Create project">
@@ -61,8 +62,12 @@
     </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
-    <button type="button" class="btn btn-primary" (click)="saveProject()">Save</button>
+    <button type="button" class="btn btn-light" [disabled]="loadingSave"
+      (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-primary" [disabled]="loadingSave" (click)="saveProject()">
+      <span *ngIf="loadingSave" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      <span>{{loadingSave ? 'Loading...' : 'Save'}}</span>
+    </button>
   </div>
 </ng-template>
 
@@ -102,7 +107,16 @@
     </div> -->
     <!-- Content -->
     <div>
-      <quill-view [format]="'json'" [content]="projectToPreview.description"></quill-view>
+      <ng-container *ngIf="projectToPreview.description !== undefined; else loadingDescription">
+        <quill-view [format]="'json'" [content]="projectToPreview.description"></quill-view>
+      </ng-container>
+
+      <ng-template #loadingDescription>
+        <div class="d-flex justify-content-center w-10">
+          <div class="spinner-border spinner-border-sm" role="status"></div>
+        </div>
+      </ng-template>
+
     </div>
   </div>
   <!-- <div class="modal-footer">

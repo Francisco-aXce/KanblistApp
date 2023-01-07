@@ -30,6 +30,8 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   goalToPreview: Goal | undefined;
 
   goalsLoaded = false;
+  loadingPreview = false;
+  loadingSave = false;
 
   projectInfo: any;
   projectObs = this.route.params.pipe(
@@ -75,22 +77,22 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   get projectDescription() { return this.projectForm.get('description') as UntypedFormControl; }
 
   previewCallback = (goal: Goal) => {
+    this.loadingPreview = true;
     const goalIndex = this.goals.findIndex((g) => g.id === goal.id);
     if (goalIndex < 0) return;
-    if (!goal.description) {
-      this.storageService.getBlobText(`${goal.path}/description.json`)
-        .then((description: { text: string, success: boolean, error?: any }) => this.goals[goalIndex].description = description.text)
-    }
-    if (Object.keys(goal.attendant).length <= 1) {
-      lastValueFrom(this.dataService.getUserInfo(goal.attendant.id))
-        .then((attendantInfo) => {
-          if (!attendantInfo) return;
-          this.goals[goalIndex].attendant = attendantInfo;
-        })
-        .catch((error) => {
-          this.managementService.log('Error getting attendant info', error);
-        });
-    }
+
+    Promise.all([
+      !goal.description ? this.storageService.getBlobText(`${goal.path}/description.json`) : ({ text: goal.description, success: true }),
+      Object.keys(goal.attendant).length <= 1 ? lastValueFrom(this.dataService.getUserInfo(goal.attendant.id)) : null,
+    ]).then((results) => {
+      const desc = results[0];
+      const attend = results[1];
+
+      this.goals[goalIndex].description = desc.text;
+      if (attend) this.goals[goalIndex].attendant = attend;
+      this.loadingPreview = false;
+    });
+
     this.openGoalModal(goal);
   }
 
@@ -156,12 +158,13 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
 
   addNewGoal() {
     this.goalForm.reset();
-    this.modalService.open(this.modalAddGoal, { centered: true, size: 'xl' });
+    this.modalService.open(this.modalAddGoal, { centered: true, size: 'xl', backdrop: 'static', keyboard: false });
   }
 
   async saveGoal() {
     this.goalForm.markAllAsTouched();
-    if (this.goalForm.invalid) return;
+    this.loadingSave = true;
+    if (this.goalForm.invalid || this.loadingPreview) return;
 
     const goalData = {
       name: this.name.value,
@@ -173,20 +176,24 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       .then(() => {
         this.modalService.dismissAll();
         this.goalForm.reset();
+        this.loadingSave = false;
       });
   }
 
   async editProject() {
-    this.modalService.open(this.modalEditProject, { centered: true, size: 'xl' });
+    this.loadingPreview = true;
+    this.modalService.open(this.modalEditProject, { centered: true, size: 'xl', backdrop: 'static', keyboard: false });
     if (!this.projectInfo.description) {
       this.projectInfo.description = await this.dataService.getProjectDesc(this.projectInfo.owner.id, this.projectInfo.id);
     }
     this.projectForm.patchValue(this.projectInfo);
+    this.loadingPreview = false;
   }
 
   async saveProject() {
     this.projectForm.markAllAsTouched();
-    if (this.projectForm.invalid) return;
+    this.loadingSave = true;
+    if (this.projectForm.invalid || this.loadingPreview) return;
 
     const newData = {
       name: this.projectName.value !== this.projectInfo.name ? this.projectName.value : undefined,
@@ -202,6 +209,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       .then(() => {
         if (newData.description) this.dataService.updateLocalProjectDesc(this.projectInfo.id, newData.description);
         this.modalService.dismissAll();
+        this.loadingSave = false;
       });
 
   }

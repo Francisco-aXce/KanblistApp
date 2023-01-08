@@ -6,13 +6,19 @@ import { catchError, Observable, of, tap } from 'rxjs';
 import { ManagementService } from './management.service';
 import { defaultImage } from 'src/assets/Projects/valid-images.project';
 import { StorageService } from './storage.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable()
 export class DataService {
 
-  // FIXME: This is a temporary solution to call the APIs
-  baseUrlProjects = 'http://localhost:5001/kanb-list/us-central1/apiprojects/api/v1';
-  baseUrlUsers = 'http://localhost:5001/kanb-list/us-central1/apiusers/api/v1';
+  // TODO: Separate data service and API service
+
+  baseUrl = environment.useEmulators
+    ? 'http://localhost:5001/kanb-list/us-central1'
+    : 'https://us-central1-kanb-list.cloudfunctions.net';
+
+  baseUrlProjects = `${this.baseUrl}/apiprojects/api/v1`;
+  baseUrlUsers = `${this.baseUrl}/apiusers/api/v1`;
 
   private projectsDescs: { [key: string]: string } = {};
   private goalsDescs: { [key: string]: string } = {};

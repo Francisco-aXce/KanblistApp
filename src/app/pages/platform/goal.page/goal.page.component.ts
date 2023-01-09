@@ -6,6 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { combineLatest, firstValueFrom, lastValueFrom, of } from 'rxjs';
 import { map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 import { Options } from 'sortablejs';
+import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { FireService } from 'src/app/services/fire.service';
@@ -44,7 +45,7 @@ export class GoalPageComponent implements OnInit {
             if (this.projOwner) {
               return of({ ...projectData, owner: this.projOwner });
             }
-            return this.dataService.getUserInfo(projectData.owner.id).pipe(
+            return this.apiService.getUserInfo(projectData.owner.id).pipe(
               map((ownerData) => {
                 this.projOwner = ownerData;
                 return { ...projectData, owner: ownerData };
@@ -117,6 +118,7 @@ export class GoalPageComponent implements OnInit {
     private authService: AuthService,
     private managementService: ManagementService,
     private dataService: DataService,
+    private apiService: ApiService,
   ) { }
 
   ngOnInit(): void {
@@ -176,13 +178,13 @@ export class GoalPageComponent implements OnInit {
     };
 
     if (this.editMode) {
-      await lastValueFrom(this.dataService.editBoard(this.data.project, this.data.goal, this.boardToEdit, finalData))
+      await lastValueFrom(this.apiService.editBoard(this.data.project, this.data.goal, this.boardToEdit, finalData))
         .then(() => {
           this.modalService.dismissAll();
           this.editMode = false;
         });
     } else {
-      await lastValueFrom(this.dataService.createBoard(this.data.project, this.data.goal, finalData))
+      await lastValueFrom(this.apiService.createBoard(this.data.project, this.data.goal, finalData))
         .then(() => {
           this.modalService.dismissAll();
         });
@@ -222,7 +224,7 @@ export class GoalPageComponent implements OnInit {
 
     if (this.editMode) {
       if (Object.keys(finalData).every(key => finalData[key] === this.taskToEdit?.[key])) return;
-      await lastValueFrom(this.dataService.editTask(this.data.project, this.data.goal, this.boardToEdit, this.taskToEdit, finalData))
+      await lastValueFrom(this.apiService.editTask(this.data.project, this.data.goal, this.boardToEdit, this.taskToEdit, finalData))
         .then(() => {
           this.modalService.dismissAll();
           this.boardToEdit = undefined;
@@ -230,7 +232,7 @@ export class GoalPageComponent implements OnInit {
           this.editMode = false;
         });
     } else {
-      await lastValueFrom(this.dataService.createTask(this.data.project, this.data.goal, this.boardToEdit, finalData)).
+      await lastValueFrom(this.apiService.createTask(this.data.project, this.data.goal, this.boardToEdit, finalData)).
         then(() => {
           this.modalService.dismissAll();
           this.boardToEdit = undefined;

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Goal } from 'src/app/models/projects.model';
+import { Goal } from 'src/app/models/goal.model';
 
 @Component({
   selector: 'app-goal-card',

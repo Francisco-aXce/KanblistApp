@@ -12,6 +12,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbDropdownModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { QuillModule } from 'ngx-quill';
 import { SortablejsModule } from 'ngx-sortablejs';
+import { FireService } from 'src/app/services/fire.service';
 
 
 @NgModule({
@@ -32,6 +33,9 @@ import { SortablejsModule } from 'ngx-sortablejs';
     FormsModule,
     QuillModule.forRoot(),
     SortablejsModule,
+  ],
+  providers: [
+    FireService,
   ]
 })
 export class PlatformModule { }

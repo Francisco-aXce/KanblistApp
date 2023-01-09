@@ -2,7 +2,7 @@ import { Injectable, isDevMode } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 export class Constants {
-  static readonly DEFAULT_REDIRECT_LOGIN = '/platform'; //TODO: Temp profile
+  static readonly DEFAULT_REDIRECT_LOGIN = '/platform';
   static readonly DEFAULT_REDIRECT_LOGOUT = '/home';
 }
 

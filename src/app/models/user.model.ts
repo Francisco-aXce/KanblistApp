@@ -6,9 +6,10 @@ export interface UserData {
 
 export interface UserBasicInfo {
   id: string,
-  name: string,
+  name?: string,
   surname?: string,
   email?: string,
+  photo?: string,
 }
 
 // user form types: 'login' | 'signup'

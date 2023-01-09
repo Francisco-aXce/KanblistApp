@@ -1,4 +1,4 @@
-import { GralDoc } from "./docs.model";
+import { GralDoc } from "./doc.model";
 import { UserBasicInfo } from "./user.model";
 
 export interface ProjectCreation {
@@ -8,12 +8,12 @@ export interface ProjectCreation {
   active?: boolean,
 };
 
+export interface ProjectUpdate {
+  name?: string,
+  image?: string,
+  description?: string,
+}
+
 export interface Project extends ProjectCreation, GralDoc {
   owner: UserBasicInfo,
-};
-
-export interface Goal extends Omit<Project, 'image' | 'owner'> {
-  order: number,
-  color?: string,
-  attendant: UserBasicInfo,
 };

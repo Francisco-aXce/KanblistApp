@@ -6,13 +6,11 @@ import {
 } from '@angular/fire/firestore';
 import { ToastrService } from 'ngx-toastr';
 import { map, Observable } from 'rxjs';
-import { GralDoc } from '../models/docs.model';
+import { GralDoc } from '../models/doc.model';
 import { ManagementService } from './management.service';
 import sizeof from 'firestore-size';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class FireService {
 
   get timestamp() {
@@ -74,7 +72,7 @@ export class FireService {
       map((doc) => {
         if (isDevMode()) {
           const bytes = sizeof({ ...doc.data() });
-          this.managementService.log(`Reading doc ${doc.id} - ${this.formatBytes(bytes)}`);
+          this.managementService.log(`Reading doc (doc$) ${doc.id} - ${this.formatBytes(bytes)} from cache: ${doc.metadata.fromCache}`);
         }
         return {
           id: doc.id,
@@ -90,7 +88,7 @@ export class FireService {
     return onSnapshot(this.doc(path), (doc) => {
       if (isDevMode()) {
         const bytes = sizeof({ ...doc.data() });
-        this.managementService.log(`Reading doc ${doc.id} - ${this.formatBytes(bytes)}`);
+        this.managementService.log(`Reading doc (snapDocs) ${doc.id} - ${this.formatBytes(bytes)} from cache: ${doc.metadata.fromCache}`);
       }
       const finalData: GralDoc = {
         id: doc.id,
@@ -113,7 +111,7 @@ export class FireService {
 
         if (isDevMode()) {
           const bytes = sizeof(doc.data());
-          this.managementService.log(`Reading doc ${doc.id} - ${this.formatBytes(bytes)}`);
+          this.managementService.log(`Reading doc (snapCol) ${doc.id} - ${this.formatBytes(bytes)}, from cache: ${querySnapshot.metadata.fromCache}`);
         }
 
         return {

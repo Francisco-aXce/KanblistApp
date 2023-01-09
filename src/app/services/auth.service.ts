@@ -17,11 +17,11 @@ export class AuthService {
   readonly userInfo$: Observable<UserData | null> = user(this.auth).pipe(
     switchMap(user => user ? from(getIdTokenResult(user, true)) : of(null)),
     map(tokenRes =>
-      tokenRes ? (
-        {
+      tokenRes
+        ? ({
           claims: tokenRes.claims
-        }
-      ) : null),
+        })
+        : null),
     tap((data) => {
       this.managementService.loaded = true;
       this.managementService.log('userInfo: ', data);

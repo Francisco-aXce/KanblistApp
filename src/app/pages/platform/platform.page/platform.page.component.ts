@@ -3,15 +3,16 @@ import { Unsubscribe } from '@angular/fire/firestore';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject, OperatorFunction, of, lastValueFrom, merge } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, filter, first, map, tap } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { FireService } from 'src/app/services/fire.service';
 import { ManagementService } from 'src/app/services/management.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { defaultImage, validImages } from 'src/assets/Projects/valid-images.project';
-import { Project } from 'src/app/models/projects.model';
+import { Project } from 'src/app/models/project.model';
 import { QuillConfig } from 'ngx-quill/config';
+import { ApiService } from 'src/app/services/api.service';
 
 @Component({
   selector: 'app-platform.page',
@@ -86,31 +87,29 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private managementService: ManagementService,
     public dataService: DataService,
+    private apiService: ApiService,
     private modalService: NgbModal,
   ) { }
 
   ngOnInit() {
     this.authService.userInfo$.pipe(
       filter((userData) => !!userData),
-      first(),
       tap((userData) => {
         const userId: string | undefined = userData?.claims?.['user_id'];
-        if (!userData || !userId) {
+        if (!userId) {
           this.toastr.error('Please login first', 'Error');
           return;
         }
-
-        this.projectsUnsub?.();
-        this.projectsUnsub = this.fireService.onSnapshotCol$(`users/${userId}/projects`,
+        this.projectsUnsub ??= this.fireService.onSnapshotCol$(`users/${userId}/projects`,
           (docs: Project[]) => this.getProjects(docs),
           [this.fireService.orderBy('createdAt', 'desc'), this.fireService.where('active', '==', true)]);
-
       }),
       catchError((error) => {
         this.toastr.error('Error while getting user data', 'Error');
         this.managementService.error(error);
         return of(null);
       }),
+      take(1),
     ).subscribe();
 
   }
@@ -139,7 +138,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
       description: this.description.value,
     };
 
-    await lastValueFrom(this.dataService.createProject(projectData))
+    await lastValueFrom(this.apiService.createProject(projectData))
       .then(() => {
         this.modalService.dismissAll();
         this.projectForm.reset();

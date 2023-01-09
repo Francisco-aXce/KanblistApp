@@ -5,9 +5,10 @@ import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { QuillConfig } from 'ngx-quill';
 import { ToastrService } from 'ngx-toastr';
-import { combineLatest, firstValueFrom, lastValueFrom, map, of, shareReplay, switchMap, take, tap } from 'rxjs';
+import { combineLatest, distinctUntilKeyChanged, firstValueFrom, lastValueFrom, map, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { Options } from 'sortablejs';
-import { Goal } from 'src/app/models/projects.model';
+import { Goal } from 'src/app/models/goal.model';
+import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { FireService } from 'src/app/services/fire.service';
@@ -36,27 +37,25 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   projOwner: any;
 
   projectInfo: any;
-  projectObs = this.route.params.pipe(
-    switchMap(({ projectId }) => this.authService.userInfo$.pipe(
-      map((userData) => `users/${userData?.claims?.['user_id']}/projects/${projectId}`)
+  projectObs = combineLatest([
+    this.route.params.pipe(distinctUntilKeyChanged('projectId')),
+    this.authService.userInfo$,
+  ]).pipe(
+    map(([params, userInfo]) => `users/${userInfo?.claims['user_id']}/projects/${params['projectId']}`),
+    switchMap((projectPath: string) => this.fireService.doc$(projectPath).pipe(
+      switchMap((projectData: any) => {
+        if (this.projOwner) {
+          return of({ ...projectData, owner: this.projOwner });
+        }
+        return this.apiService.getUserInfo(projectData.owner.id).pipe(
+          map((ownerData) => {
+            this.projOwner = ownerData;
+            return { ...projectData, owner: ownerData };
+          }),
+          take(1),
+        )
+      }),
     )),
-    switchMap((projectPath: string) => {
-      return this.fireService.doc$(projectPath).pipe(
-        switchMap((projectData) => {
-          if (this.projOwner) {
-            return of({ ...projectData, owner: this.projOwner });
-          }
-          return this.dataService.getUserInfo(projectData.owner.id).pipe(
-            map((ownerData) => {
-              this.projOwner = ownerData;
-              return { ...projectData, owner: ownerData };
-            }),
-            take(1),
-          )
-        }),
-      )
-    }),
-    shareReplay(1),
     tap((projData: any) => {
       this.managementService.log('Project', projData);
 
@@ -68,6 +67,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
         path: projData.path,
       };
     }),
+    shareReplay(1),
   );
 
 
@@ -98,7 +98,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
 
     Promise.all([
       !goal.description ? this.storageService.getBlobText(`${goal.path}/description.json`) : ({ text: goal.description, success: true }),
-      Object.keys(goal.attendant).length <= 1 ? lastValueFrom(this.dataService.getUserInfo(goal.attendant.id)) : null,
+      Object.keys(goal.attendant).length <= 1 ? lastValueFrom(this.apiService.getUserInfo(goal.attendant.id)) : null,
     ]).then((results) => {
       const desc = results[0];
       const attend = results[1];
@@ -128,6 +128,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     private modalService: NgbModal,
     private storageService: StorageService,
     private dataService: DataService,
+    private apiService: ApiService,
     private toastr: ToastrService,
   ) { }
 
@@ -187,7 +188,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       order: this.goals.length,
     }
 
-    await lastValueFrom(this.dataService.createGoal(this.projectInfo, goalData))
+    await lastValueFrom(this.apiService.createGoal(this.projectInfo, goalData))
       .then(() => {
         this.modalService.dismissAll();
         this.goalForm.reset();
@@ -220,7 +221,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    await lastValueFrom(this.dataService.updateProject(this.projectInfo.owner, this.projectInfo.id, newData))
+    await lastValueFrom(this.apiService.updateProject(this.projectInfo.owner, this.projectInfo.id, newData))
       .then(() => {
         if (newData.description) this.dataService.updateLocalProjectDesc(this.projectInfo.id, newData.description);
         this.modalService.dismissAll();

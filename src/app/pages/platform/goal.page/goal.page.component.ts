@@ -1,11 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Unsubscribe } from '@angular/fire/firestore';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { combineLatest, firstValueFrom, lastValueFrom, of } from 'rxjs';
-import { map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
+import { combineLatest, firstValueFrom, lastValueFrom, of, Subject } from 'rxjs';
+import { concatMap, distinctUntilChanged, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Options } from 'sortablejs';
+import { Board } from 'src/app/models/board.model';
+import { Goal } from 'src/app/models/goal.model';
+import { Project } from 'src/app/models/project.model';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -30,53 +32,49 @@ export class GoalPageComponent implements OnInit {
   loadingPreview = false;
   loadingSave = false;
 
-  projOwner: any;
+  // #region Main data
 
-  data: any;
-  projectObs = this.route.params.pipe(
-    switchMap(({ projectId, goalId }) => this.authService.userInfo$.pipe(
-      map((user) => ({ projectId, goalId, claims: user?.claims, }))
-    )),
-    switchMap(({ projectId, goalId, claims }) => {
-      const projectPath = `users/${claims?.['user_id']}/projects/${projectId}`;
+  project!: Project;
+  goal!: Goal;
+  boards!: Board[]
+
+  // #endregion
+
+  projectObs$ = combineLatest([
+    this.route.params.pipe(distinctUntilChanged((a, b) => {
+      return (a['projectId'] === b['projectId' || a['goalId'] === b['goalId']]);
+    })),
+    this.authService.userInfo$,
+  ]).pipe(
+    map(([params, userInfo]) => ({
+      projectPath: `users/${userInfo!.claims.uid}/projects/${params['projectId']}`,
+      goalPath: `users/${userInfo!.claims.uid}/projects/${params['projectId']}/goals/${params['goalId']}`,
+      boardsPath: `users/${userInfo!.claims.uid}/projects/${params['projectId']}/goals/${params['goalId']}/boards`,
+    })),
+    switchMap((paths) => {
       return combineLatest([
-        this.fireService.doc$(projectPath).pipe(
-          switchMap((projectData) => {
-            if (this.projOwner) {
-              return of({ ...projectData, owner: this.projOwner });
-            }
+        this.fireService.doc$(paths.goalPath),
+        this.fireService.col$(paths.boardsPath),
+        this.fireService.doc$(paths.projectPath).pipe(
+          concatMap((projectData) => {
             return this.apiService.getUserInfo(projectData.owner.id).pipe(
               map((ownerData) => {
-                this.projOwner = ownerData;
                 return { ...projectData, owner: ownerData };
               }),
               take(1),
             )
           }),
         ),
-        this.fireService.doc$(`${projectPath}/goals/${goalId}`),
       ]).pipe(
-        map(([project, goal]) => ({ project, goal, claims })),
+        map(([goal, boards, project]) => ({ goal, boards, project })),
       );
     }),
-    shareReplay(1),
     tap((data) => {
       this.managementService.log('GoalPageComponent', 'projectObs', data);
-
-      if (!this.boardsUnsub) {
-        this.managementService.log('setting boards unsub');
-        this.boardsUnsub = this.fireService.onSnapshotCol$(`${data.goal.path}/boards`,
-          async (boards: any[]) => await this.getBoards(boards),
-          [this.fireService.where('active', '==', true)]);
-      }
-
-      this.data = data;
     }),
+    shareReplay(1),
   );
-  boardsUnsub?: Unsubscribe;
-
-  // TODO: Add type
-  boards: any[] = [];
+  destroy$: Subject<boolean> = new Subject();
 
   readonly boardForm = new UntypedFormGroup({
     name: new UntypedFormControl('', [Validators.required, Validators.minLength(1), Validators.maxLength(17)]),
@@ -117,35 +115,23 @@ export class GoalPageComponent implements OnInit {
     private fireService: FireService,
     private authService: AuthService,
     private managementService: ManagementService,
-    private dataService: DataService,
     private apiService: ApiService,
   ) { }
 
   ngOnInit(): void {
+    this.projectObs$.pipe(
+      takeUntil(this.destroy$),
+    ).subscribe((data) => {
+      this.project = data.project;
+      this.goal = data.goal;
+      this.boards = data.boards as Board[];
+      this.boardsLoaded = true;
+    });
   }
 
   ngOnDestroy(): void {
-    this.boardsUnsub?.();
-  }
-
-  // TODO: Add type
-  // FIXME: Repetitive code with goals
-  async getBoards(boards: any[]) {
-    const boardsRaw = boards;
-    const obsData = await firstValueFrom(this.projectObs);
-    const sortedBoardsIds = obsData.goal.boards ?? [];
-    const finalBoards: any[] = [];
-
-    for (const boardInfo of sortedBoardsIds) {
-      const board = boardsRaw.find((b) => b.id === boardInfo.id);
-      if (board) finalBoards.push(board);
-    }
-    const restBoards = boardsRaw.filter((b) => !finalBoards.find((s) => s.id === b.id));
-    finalBoards.push(...restBoards);
-
-    this.boards = finalBoards;
-    this.boardsLoaded = true;
-    this.managementService.log('Boards final', this.boards);
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 
   openBoardModal() {
@@ -178,13 +164,13 @@ export class GoalPageComponent implements OnInit {
     };
 
     if (this.editMode) {
-      await lastValueFrom(this.apiService.editBoard(this.data.project, this.data.goal, this.boardToEdit, finalData))
+      await lastValueFrom(this.apiService.editBoard(this.project, this.goal, this.boardToEdit, finalData))
         .then(() => {
           this.modalService.dismissAll();
           this.editMode = false;
         });
     } else {
-      await lastValueFrom(this.apiService.createBoard(this.data.project, this.data.goal, finalData))
+      await lastValueFrom(this.apiService.createBoard(this.project, this.goal, finalData))
         .then(() => {
           this.modalService.dismissAll();
         });
@@ -199,7 +185,7 @@ export class GoalPageComponent implements OnInit {
       id: board.id,
     }));
 
-    await this.fireService.updateDoc(this.data.goal.path, {
+    await this.fireService.updateDoc(this.goal.path, {
       boards: boardsToSet,
     });
     this.managementService.log('sorted');
@@ -224,7 +210,7 @@ export class GoalPageComponent implements OnInit {
 
     if (this.editMode) {
       if (Object.keys(finalData).every(key => finalData[key] === this.taskToEdit?.[key])) return;
-      await lastValueFrom(this.apiService.editTask(this.data.project, this.data.goal, this.boardToEdit, this.taskToEdit, finalData))
+      await lastValueFrom(this.apiService.editTask(this.project, this.goal, this.boardToEdit, this.taskToEdit, finalData))
         .then(() => {
           this.modalService.dismissAll();
           this.boardToEdit = undefined;
@@ -232,7 +218,7 @@ export class GoalPageComponent implements OnInit {
           this.editMode = false;
         });
     } else {
-      await lastValueFrom(this.apiService.createTask(this.data.project, this.data.goal, this.boardToEdit, finalData)).
+      await lastValueFrom(this.apiService.createTask(this.project, this.goal, this.boardToEdit, finalData)).
         then(() => {
           this.modalService.dismissAll();
           this.boardToEdit = undefined;

@@ -1,25 +1,23 @@
-<div *ngIf="(projectObs | async) as dbData; else fullLoading">
-  <app-project-header [projectData]="dbData.project"></app-project-header>
-  <div class="container-boards" [sortablejs]="boards" [sortablejsOptions]="boardsDndOptions">
-    <ng-container *ngIf="boardsLoaded; else loading">
-      <app-board class="board-drag" *ngFor="let board of boards" [data]="board" [canEditBoard]="editBoardCallback"
-        [canAddTask]="addTaskCallback" [canEditTask]="editTaskCallback"></app-board>
-      <div class="add-board">
-        <button class="btn btn-light bg-secondary-custom-1 text-start" type="button" (click)="onCreateBoard()">
-          <i class="bi bi-plus-lg mx-1 opacity-50"></i>
-          <span class="opacity-50">Add board</span>
-        </button>
-      </div>
-    </ng-container>
+<app-project-header [loaded]="!!project" [projectData]="project"></app-project-header>
+<div class="container-boards" [sortablejs]="boards" [sortablejsOptions]="boardsDndOptions">
+  <ng-container *ngIf="boardsLoaded; else loading">
+    <app-board class="board-drag" *ngFor="let board of boards" [data]="board" [canEditBoard]="editBoardCallback"
+      [canAddTask]="addTaskCallback" [canEditTask]="editTaskCallback"></app-board>
+    <div class="add-board">
+      <button class="btn btn-light bg-secondary-custom-1 text-start" type="button" (click)="onCreateBoard()">
+        <i class="bi bi-plus-lg mx-1 opacity-50"></i>
+        <span class="opacity-50">Add board</span>
+      </button>
+    </div>
+  </ng-container>
 
-    <ng-template #loading>
-      <div class="d-flex justify-content-center align-content-center m-4">
-        <div class="spinner-border" role="status">
-        </div>
+  <ng-template #loading>
+    <div class="d-flex justify-content-center align-content-center m-4">
+      <div class="spinner-border" role="status">
       </div>
-    </ng-template>
+    </div>
+  </ng-template>
 
-  </div>
 </div>
 
 <ng-template #fullLoading>

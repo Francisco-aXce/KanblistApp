@@ -1,8 +1,9 @@
-<div class="container container-goals" *ngIf="(projectObs | async) as projectData; else fullLoading">
+<div class="container container-goals">
   <ng-container>
 
     <div class="pt-4">
-      <app-project-header [projectData]="projectData" [canEdit]="editProjCallback"></app-project-header>
+      <app-project-header [loaded]="!!project" [projectData]="project"
+        [canEdit]="editProjCallback"></app-project-header>
     </div>
 
     <div class="card my-4 shadow">

@@ -1,32 +1,40 @@
 <header>
   <div class="container-fluid bg-secondary-custom d-lg-flex py-2 shadow">
-    <div class="col-lg-5 my-auto mx-auto mx-lg-0">
-      <div class="text-black fw-bolder h4 text-center">
-        {{data.name ?? 'Project name'}}
+
+    <ng-container *ngIf="loaded; else loading">
+      <div class="col-lg-5 my-auto mx-auto mx-lg-0">
+        <div class="text-black fw-bolder h4 text-center">
+          {{data.name ?? 'Project name'}}
+        </div>
       </div>
-    </div>
-    <div class="divider-xs mb-2 d-lg-none bg-main-custom"></div>
-    <div class="d-sm-flex col-auto justify-content-center">
-      <div class="divider d-none d-lg-block bg-main-custom"></div>
-      <div class="d-flex justify-content-center d-sm-block ms-sm-3 px-auto my-auto">
-        <app-public-profile [size]="'sm'" [userName]="data?.owner?.name ?? 'User name'"
-          [profilePic]="data?.owner?.photo ?? './../../../../assets/nouser.svg'"></app-public-profile>
-      </div>
-      <!-- TODO: Shared system -->
-      <!-- <div class="d-flex justify-content-center users-shared ms-sm-4 my-auto"> -->
-      <!-- TODO: Show names on hover and show just 4 and the rest on a dropdown showing that there are more users -->
-      <!-- <ng-container *ngFor="let user of [1,2,3,4]">
+      <div class="divider-xs mb-2 d-lg-none bg-main-custom"></div>
+      <div class="d-sm-flex col-auto justify-content-center">
+        <div class="divider d-none d-lg-block bg-main-custom"></div>
+        <div class="d-flex justify-content-center d-sm-block ms-sm-3 px-auto my-auto">
+          <app-public-profile [size]="'sm'" [userName]="data?.owner?.name ?? 'User name'"
+            [profilePic]="data?.owner?.photo ?? './../../../../assets/nouser.svg'"></app-public-profile>
+        </div>
+        <!-- TODO: Shared system -->
+        <!-- <div class="d-flex justify-content-center users-shared ms-sm-4 my-auto"> -->
+        <!-- TODO: Show names on hover and show just 4 and the rest on a dropdown showing that there are more users -->
+        <!-- <ng-container *ngFor="let user of [1,2,3,4]">
           <div class="my-auto">
             <app-public-profile [size]="'xs'" [showName]="false" [profilePic]="'jajaja'"></app-public-profile>
           </div>
         </ng-container>
       </div> -->
-      <div class="d-flex justify-content-center mt-2 mt-sm-0">
-        <!-- <button type="button" class="btn btn-primary ms-3 px-4">Invite</button> -->
-        <button class="btn btn-light ms-2" *ngIf="canEdit" (click)="canEdit()">
-          <i class="bi bi-pencil-fill"></i>
-        </button>
+        <div class="d-flex justify-content-center mt-2 mt-sm-0">
+          <!-- <button type="button" class="btn btn-primary ms-3 px-4">Invite</button> -->
+          <button class="btn btn-light ms-2" *ngIf="canEdit" (click)="canEdit()">
+            <i class="bi bi-pencil-fill"></i>
+          </button>
+        </div>
       </div>
-    </div>
+    </ng-container>
+
+    <ng-template #loading>
+      <div class="spinner-border my-auto mx-auto" role="status"></div>
+    </ng-template>
+
   </div>
 </header>

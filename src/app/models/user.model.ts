@@ -1,7 +1,7 @@
 import { ParsedToken } from "@angular/fire/auth";
 
 export interface UserData {
-  claims: ParsedToken,
+  claims: ParsedToken & { uid: string },
 };
 
 export interface UserBasicInfo {

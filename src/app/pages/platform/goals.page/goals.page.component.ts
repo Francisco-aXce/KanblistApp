@@ -1,13 +1,14 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Unsubscribe } from '@angular/fire/firestore';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { QuillConfig } from 'ngx-quill';
 import { ToastrService } from 'ngx-toastr';
-import { combineLatest, distinctUntilKeyChanged, firstValueFrom, lastValueFrom, map, of, shareReplay, switchMap, take, tap } from 'rxjs';
+import { concatMap, distinctUntilKeyChanged, map, shareReplay, switchMap, take, tap, takeUntil } from 'rxjs/operators';
+import { combineLatest, lastValueFrom, Subject } from 'rxjs';
 import { Options } from 'sortablejs';
 import { Goal } from 'src/app/models/goal.model';
+import { Project } from 'src/app/models/project.model';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -26,50 +27,48 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   @ViewChild('modalAddGoal') modalAddGoal!: HTMLElement;
   @ViewChild('modalEditProject') modalEditProject!: HTMLElement;
 
-  goalsUnsub: Unsubscribe | undefined;
-  goals: Goal[] = [];
   goalToPreview: Goal | undefined;
+
+  // #region Main data
+
+  goals: Goal[] = [];
+  project!: Project;
+
+  // #endregion
 
   goalsLoaded = false;
   loadingPreview = false;
   loadingSave = false;
 
-  projOwner: any;
-
-  projectInfo: any;
   projectObs = combineLatest([
     this.route.params.pipe(distinctUntilKeyChanged('projectId')),
     this.authService.userInfo$,
   ]).pipe(
-    map(([params, userInfo]) => `users/${userInfo?.claims['user_id']}/projects/${params['projectId']}`),
-    switchMap((projectPath: string) => this.fireService.doc$(projectPath).pipe(
-      switchMap((projectData: any) => {
-        if (this.projOwner) {
-          return of({ ...projectData, owner: this.projOwner });
-        }
-        return this.apiService.getUserInfo(projectData.owner.id).pipe(
-          map((ownerData) => {
-            this.projOwner = ownerData;
-            return { ...projectData, owner: ownerData };
-          }),
-          take(1),
-        )
-      }),
-    )),
-    tap((projData: any) => {
-      this.managementService.log('Project', projData);
-
-      this.projectInfo = {
-        id: projData.id,
-        name: projData.name,
-        description: projData.description,
-        owner: projData.owner,
-        path: projData.path,
-      };
+    map(([params, userInfo]) => ({
+      projectPath: `users/${userInfo?.claims.uid}/projects/${params['projectId']}`,
+      goalsPath: `users/${userInfo?.claims.uid}/projects/${params['projectId']}/goals`,
+    })),
+    switchMap((paths) => combineLatest([
+      this.fireService.col$(paths.goalsPath, [this.fireService.where('active', '==', true),]),
+      this.fireService.doc$(paths.projectPath).pipe(
+        concatMap((projectData) => {
+          // FIXME: Find a way to not make a request every time the project data changes
+          return this.apiService.getUserInfo(projectData.owner.id).pipe(
+            map((ownerData) => {
+              return ({ ...projectData, owner: ownerData });
+            }),
+            take(1),
+          )
+        }),
+      ),
+    ])),
+    map(([goals, projData]) => ({ goals, projData })),
+    tap((data) => {
+      this.managementService.log('Data project -> goal', data);
     }),
     shareReplay(1),
   );
-
+  destroy$: Subject<boolean> = new Subject();
 
   quillConfig: QuillConfig = {
     format: 'json',
@@ -133,38 +132,23 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    // In this case using promise with firstValueFrom seems to be better (faster) than using observable with first operator
-    firstValueFrom(this.projectObs).then((projectData: any) => {
-      if (!this.goalsUnsub) {
-        this.managementService.log('setting goals unsub');
-        this.goalsUnsub = this.fireService.onSnapshotCol$(`${projectData.path}/goals`,
-          (goals: Goal[]) => this.getGoals(goals, projectData),
-          [this.fireService.where('active', '==', true)]);
-      }
+    this.projectObs.pipe(
+      takeUntil(this.destroy$),
+    ).subscribe((data) => {
+      this.project = data.projData;
+      const rawGoals = data.goals as Goal[];
+      this.goals = (data.projData.goals ?? []).reduce(function (filtered: Goal[], option: Goal) {
+        const finalGoal = rawGoals.find((goal) => goal.id === option.id);
+        if (finalGoal) filtered.push(finalGoal);
+        return filtered;
+      }, []);
+      this.goalsLoaded = true;
     });
   }
 
   ngOnDestroy(): void {
-    this.goalsUnsub?.();
-  }
-
-  // TODO: Fix types
-  getGoals(goals: Goal[], projectData: any) {
-    const goalsRaw = goals;
-    const sortedGoalsIds = projectData.goals ?? [];
-    const finalGoals: any[] = [];
-
-    for (const goalInfo of sortedGoalsIds) {
-      const goal = goalsRaw.find((g) => g.id === goalInfo.id);
-      if (goal) finalGoals.push(goal);
-    }
-
-    const restGoals = goalsRaw.filter((g) => !finalGoals.find((s) => s.id === g.id));
-    finalGoals.push(...restGoals);
-
-    this.goals = finalGoals;
-    this.goalsLoaded = true;
-    this.managementService.log('Goals final', this.goals);
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 
   openGoalModal(goal: Goal) {
@@ -188,7 +172,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       order: this.goals.length,
     }
 
-    await lastValueFrom(this.apiService.createGoal(this.projectInfo, goalData))
+    await lastValueFrom(this.apiService.createGoal(this.project, goalData))
       .then(() => {
         this.modalService.dismissAll();
         this.goalForm.reset();
@@ -199,10 +183,10 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   async editProject() {
     this.loadingPreview = true;
     this.modalService.open(this.modalEditProject, { centered: true, size: 'xl', backdrop: 'static', keyboard: false });
-    if (!this.projectInfo.description) {
-      this.projectInfo.description = await this.dataService.getProjectDesc(this.projectInfo.owner.id, this.projectInfo.id);
+    if (!this.project!.description) {
+      this.project.description = await this.dataService.getProjectDesc(this.project.owner.id, this.project.id);
     }
-    this.projectForm.patchValue(this.projectInfo);
+    this.projectForm.patchValue(this.project);
     this.loadingPreview = false;
   }
 
@@ -212,8 +196,8 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     if (this.projectForm.invalid || this.loadingPreview) return;
 
     const newData = {
-      name: this.projectName.value !== this.projectInfo.name ? this.projectName.value : undefined,
-      description: this.projectDescription.value !== this.projectInfo.description ? this.projectDescription.value : undefined,
+      name: this.projectName.value !== this.project.name ? this.projectName.value : undefined,
+      description: this.projectDescription.value !== this.project.description ? this.projectDescription.value : undefined,
     }
 
     if (!newData.name && !newData.description) {
@@ -221,9 +205,9 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    await lastValueFrom(this.apiService.updateProject(this.projectInfo.owner, this.projectInfo.id, newData))
+    await lastValueFrom(this.apiService.updateProject(this.project.owner, this.project.id, newData))
       .then(() => {
-        if (newData.description) this.dataService.updateLocalProjectDesc(this.projectInfo.id, newData.description);
+        if (newData.description) this.dataService.updateLocalProjectDesc(this.project.id, newData.description);
         this.modalService.dismissAll();
         this.loadingSave = false;
       });
@@ -235,7 +219,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       id: goal.id,
     }));
 
-    await this.fireService.updateDoc(this.projectInfo.path, {
+    await this.fireService.updateDoc(this.project.path, {
       goals: goalsToSet,
     });
     this.managementService.log('sorted');

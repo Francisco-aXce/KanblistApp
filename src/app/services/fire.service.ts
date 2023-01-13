@@ -1,12 +1,10 @@
 import { Injectable, isDevMode } from '@angular/core';
 import {
   Firestore, doc, setDoc, serverTimestamp, DocumentReference, DocumentData, WithFieldValue,
-  collection, query, QueryConstraint, CollectionReference, onSnapshot, docSnapshots, Unsubscribe, orderBy,
-  where, FieldPath, WhereFilterOp, updateDoc
+  collection, query, QueryConstraint, CollectionReference, docSnapshots, orderBy,
+  where, FieldPath, WhereFilterOp, updateDoc, collectionData
 } from '@angular/fire/firestore';
-import { ToastrService } from 'ngx-toastr';
 import { map, Observable } from 'rxjs';
-import { GralDoc } from '../models/doc.model';
 import { ManagementService } from './management.service';
 import sizeof from 'firestore-size';
 
@@ -20,7 +18,6 @@ export class FireService {
   constructor(
     private firestore: Firestore,
     private managementService: ManagementService,
-    private toastr: ToastrService,
   ) { }
 
   //  #region Reference
@@ -84,50 +81,71 @@ export class FireService {
     );
   }
 
-  onSnapshotDoc$(path: string, callback: Function): Unsubscribe {
-    return onSnapshot(this.doc(path), (doc) => {
-      if (isDevMode()) {
-        const bytes = sizeof({ ...doc.data() });
-        this.managementService.log(`Reading doc (snapDocs) ${doc.id} - ${this.formatBytes(bytes)} from cache: ${doc.metadata.fromCache}`);
-      }
-      const finalData: GralDoc = {
-        id: doc.id,
-        ...doc.data(),
-        path: doc.ref.path,
-        exists: doc.exists(),
-      }
-      return callback(finalData);
-    },
-      (error) => {
-        this.toastr.error('Error getting data', 'Error');
-        this.managementService.error('Error onSnapshotDoc$ fireService', error);
-      });
-  }
+  // onSnapshotDoc$(path: string, callback: Function): Unsubscribe {
+  //   return onSnapshot(this.doc(path), (doc) => {
+  //     if (isDevMode()) {
+  //       const bytes = sizeof({ ...doc.data() });
+  //       this.managementService.log(`Reading doc (snapDocs) ${doc.id} - ${this.formatBytes(bytes)} from cache: ${doc.metadata.fromCache}`);
+  //     }
+  //     const finalData: GralDoc = {
+  //       id: doc.id,
+  //       ...doc.data(),
+  //       path: doc.ref.path,
+  //       exists: doc.exists(),
+  //     }
+  //     return callback(finalData);
+  //   },
+  //     (error) => {
+  //       this.toastr.error('Error getting data', 'Error');
+  //       this.managementService.error('Error onSnapshotDoc$ fireService', error);
+  //     });
+  // }
 
-  onSnapshotCol$(path: string, callback: Function, queryFn?: QueryConstraint[]): Unsubscribe {
-    return onSnapshot(queryFn ? this.col(path, queryFn) : this.col(path), (querySnapshot) => {
-      if (querySnapshot.empty) return callback([]);
-      const finalData: GralDoc[] = querySnapshot.docs.map((doc) => {
+  // onSnapshotCol$(path: string, callback: Function, queryFn?: QueryConstraint[]): Unsubscribe {
+  //   return onSnapshot(queryFn ? this.col(path, queryFn) : this.col(path), (querySnapshot) => {
+  //     if (querySnapshot.empty) return callback([]);
+  //     const finalData: GralDoc[] = querySnapshot.docs.map((doc) => {
 
-        if (isDevMode()) {
-          const bytes = sizeof(doc.data());
-          this.managementService.log(`Reading doc (snapCol) ${doc.id} - ${this.formatBytes(bytes)}, from cache: ${querySnapshot.metadata.fromCache}`);
-        }
+  //       if (isDevMode()) {
+  //         const bytes = sizeof(doc.data());
+  //         this.managementService.log(`Reading doc (snapCol) ${doc.id} - ${this.formatBytes(bytes)}, from cache: ${querySnapshot.metadata.fromCache}`);
+  //       }
 
-        return {
-          id: doc.id,
-          ...doc.data(),
-          path: doc.ref.path,
-          exists: doc.exists(),
-          fromCache: querySnapshot.metadata.fromCache,
-        }
-      });
-      return callback(finalData);
-    },
-      (error) => {
-        this.toastr.error('Error getting new data', 'Error');
-        this.managementService.error('Error onSnapshotCol$ fireService', error);
-      })
+  //       return {
+  //         id: doc.id,
+  //         ...doc.data(),
+  //         path: doc.ref.path,
+  //         exists: doc.exists(),
+  //         fromCache: querySnapshot.metadata.fromCache,
+  //       }
+  //     });
+  //     return callback(finalData);
+  //   },
+  //     (error) => {
+  //       this.toastr.error('Error getting new data', 'Error');
+  //       this.managementService.error('Error onSnapshotCol$ fireService', error);
+  //     })
+  // }
+
+  col$(col: string, queryFn?: QueryConstraint[]): Observable<DocumentData[]> {
+    const colRef = this.col(col, queryFn);
+    return collectionData(colRef, { idField: 'id' }).pipe(
+      map((dataArr) => {
+        return dataArr.map((data) => {
+
+          if (isDevMode()) {
+            const bytes = sizeof(data);
+            this.managementService.log(`Reading col (col$) ${colRef.path}/${data['id']} - ${this.formatBytes(bytes)}`);
+          }
+
+          return {
+            ...data,
+            path: `${colRef.path}/${data['id']}`,
+            exists: true,
+          }
+        })
+      }),
+    );
   }
 
   private formatBytes(bytes: number, decimals = 2) {

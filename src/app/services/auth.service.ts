@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, from, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
+import { catchError, concatMap, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { ManagementService, Constants } from './management.service';
 import { ToastrService } from 'ngx-toastr';
 import {
@@ -15,11 +15,11 @@ import { UserData } from '../models/user.model';
 export class AuthService {
 
   readonly userInfo$: Observable<UserData | null> = user(this.auth).pipe(
-    switchMap(user => user ? from(getIdTokenResult(user, true)) : of(null)),
+    concatMap(user => user ? getIdTokenResult(user, true) : of(null)),
     map(tokenRes =>
       tokenRes
         ? ({
-          claims: tokenRes.claims
+          claims: Object.assign(tokenRes.claims, { uid: tokenRes.claims.sub ?? 'invalid' }),
         })
         : null),
     tap((data) => {

@@ -1,9 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Unsubscribe } from '@angular/fire/firestore';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject, OperatorFunction, of, lastValueFrom, merge } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { FireService } from 'src/app/services/fire.service';
@@ -21,16 +19,32 @@ import { ApiService } from 'src/app/services/api.service';
 })
 export class PlatformPageComponent implements OnInit, OnDestroy {
 
-  projectsUnsub: Unsubscribe | undefined;
-  projects: Project[] = [];
-
   projectToPreview: any | undefined;
 
   projectsLoaded = false;
   loadingSave = false;
 
+  // #region Main data
+
+  projects: Project[] = [];
+
+  // #endregion
+
   @ViewChild('modalNewProject') modalNewProject!: HTMLElement;
   @ViewChild('modalProjectPreview') modalProjectPreview!: HTMLElement;
+
+  readonly destroy$: Subject<boolean> = new Subject();
+  projectObs$: Observable<Project[]> = this.authService.userInfo$.pipe(
+    filter((user) => !!user),
+    switchMap((user) => this.fireService.col$(`users/${user!.claims.uid}/projects`,
+      [this.fireService.where('active', '==', true), this.fireService.orderBy('createdAt', 'desc'),
+      ]) as Observable<Project[]>),
+    catchError((error) => {
+      this.managementService.error('Error while loading projects', error);
+      return [];
+    }),
+    shareReplay(1),
+  )
 
   readonly newPCallback = () => {
     this.projectForm.reset();
@@ -38,14 +52,6 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   };
 
   readonly previewPCallback = (project: any) => {
-    if (!project.description) {
-      const projIndex = this.projects.findIndex((p) => p.id === project.id);
-      if (projIndex < 0) return;
-      this.dataService.getProjectDesc(project.owner.id, project.id)
-        .then((desc) => {
-          this.projects[projIndex].description = desc;
-        });
-    }
     this.projectToPreview = project;
     this.modalService.open(this.modalProjectPreview, { centered: true, size: 'xl' });
   };
@@ -73,7 +79,7 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   };
   // #endregion
 
-  // #region Quill config
+  // #region Quill
 
   quillConfig: QuillConfig = {
     format: 'json',
@@ -84,7 +90,6 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   constructor(
     private fireService: FireService,
     private authService: AuthService,
-    private toastr: ToastrService,
     private managementService: ManagementService,
     public dataService: DataService,
     private apiService: ApiService,
@@ -92,36 +97,19 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.authService.userInfo$.pipe(
-      filter((userData) => !!userData),
-      tap((userData) => {
-        const userId: string | undefined = userData?.claims?.['user_id'];
-        if (!userId) {
-          this.toastr.error('Please login first', 'Error');
-          return;
-        }
-        this.projectsUnsub ??= this.fireService.onSnapshotCol$(`users/${userId}/projects`,
-          (docs: Project[]) => this.getProjects(docs),
-          [this.fireService.orderBy('createdAt', 'desc'), this.fireService.where('active', '==', true)]);
-      }),
-      catchError((error) => {
-        this.toastr.error('Error while getting user data', 'Error');
-        this.managementService.error(error);
-        return of(null);
-      }),
-      take(1),
-    ).subscribe();
-
+    this.projectObs$
+      .pipe(
+        takeUntil(this.destroy$),
+      )
+      .subscribe((projects) => {
+        this.projectsLoaded = true;
+        this.projects = projects;
+      });
   }
 
   ngOnDestroy(): void {
-    this.projectsUnsub?.();
-  }
-
-  private async getProjects(projects: Project[]) {
-    this.projects = projects;
-    this.projectsLoaded = true;
-    this.managementService.log('Projects: ', this.projects);
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 
   async saveProject() {

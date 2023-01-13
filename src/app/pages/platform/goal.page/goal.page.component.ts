@@ -124,7 +124,7 @@ export class GoalPageComponent implements OnInit {
     ).subscribe((data) => {
       this.project = data.project;
       this.goal = data.goal;
-      this.boards = data.boards as Board[];
+      this.boards = this.getBoards(data.goal, data.boards as Board[]);
       this.boardsLoaded = true;
     });
   }
@@ -132,6 +132,19 @@ export class GoalPageComponent implements OnInit {
   ngOnDestroy(): void {
     this.destroy$.next(true);
     this.destroy$.complete();
+  }
+
+  private getBoards(goal: Goal, boards: Board[]): Board[] {
+    const sortedIds = goal?.boards || [];
+    const restBoards = boards.filter((board) => !sortedIds.some((brd) => brd.id === board.id))
+
+    const sorted = sortedIds.reduce((sorted: Board[], option) => {
+      const board = boards.find((board) => board.id === option.id);
+      if (board) sorted.push(board);
+      return sorted;
+    }, []);
+
+    return [...sorted, ...restBoards];
   }
 
   openBoardModal() {

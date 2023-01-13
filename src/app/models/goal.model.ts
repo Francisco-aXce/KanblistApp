@@ -8,5 +8,6 @@ export interface GoalCreation {
 }
 
 export interface Goal extends GoalCreation, GralDoc {
+  boards: { id: string }[],
   attendant: UserBasicInfo,
 };

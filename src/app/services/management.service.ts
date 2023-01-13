@@ -1,4 +1,5 @@
 import { Injectable, isDevMode } from '@angular/core';
+import { IndividualConfig, ToastrService } from 'ngx-toastr';
 import { BehaviorSubject } from 'rxjs';
 
 export class Constants {
@@ -14,7 +15,9 @@ export class ManagementService {
   private loadedBehaviour = new BehaviorSubject<boolean>(false);
   readonly loaded$ = this.loadedBehaviour.pipe();
 
-  constructor() { }
+  constructor(
+    private toastr: ToastrService,
+  ) { }
 
   set loaded(value: boolean) {
     this.loadedBehaviour.next(value);
@@ -30,6 +33,10 @@ export class ManagementService {
     if (isDevMode()) {
       console.error(message, ...optionalParams);
     }
+  }
+
+  toastError(message: string, title = 'Error', override?: Partial<IndividualConfig>) {
+    this.toastr.error(message, title, override);
   }
 
 }

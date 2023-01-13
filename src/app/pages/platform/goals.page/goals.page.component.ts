@@ -1,11 +1,11 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { QuillConfig } from 'ngx-quill';
 import { ToastrService } from 'ngx-toastr';
-import { concatMap, distinctUntilKeyChanged, map, shareReplay, switchMap, take, tap, takeUntil } from 'rxjs/operators';
-import { combineLatest, lastValueFrom, Subject } from 'rxjs';
+import { concatMap, distinctUntilKeyChanged, map, shareReplay, switchMap, take, tap, takeUntil, catchError } from 'rxjs/operators';
+import { combineLatest, lastValueFrom, Observable, of, Subject, throwError } from 'rxjs';
 import { Options } from 'sortablejs';
 import { Goal } from 'src/app/models/goal.model';
 import { Project } from 'src/app/models/project.model';
@@ -40,7 +40,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
   loadingPreview = false;
   loadingSave = false;
 
-  projectObs = combineLatest([
+  projectObs: Observable<any> = combineLatest([
     this.route.params.pipe(distinctUntilKeyChanged('projectId')),
     this.authService.userInfo$,
   ]).pipe(
@@ -49,8 +49,13 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       goalsPath: `users/${userInfo?.claims.uid}/projects/${params['projectId']}/goals`,
     })),
     switchMap((paths) => combineLatest([
-      this.fireService.col$(paths.goalsPath, [this.fireService.where('active', '==', true),]),
       this.fireService.doc$(paths.projectPath).pipe(
+        tap((projData) => {
+          if (!projData.exists) {
+            this.router.navigate(['..']);
+            throw new Error('The project does not exists');
+          };
+        }),
         concatMap((projectData) => {
           // FIXME: Find a way to not make a request every time the project data changes
           return this.apiService.getUserInfo(projectData.owner.id).pipe(
@@ -61,10 +66,16 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
           )
         }),
       ),
+      this.fireService.col$(paths.goalsPath, [this.fireService.where('active', '==', true),]),
     ])),
-    map(([goals, projData]) => ({ goals, projData })),
+    map(([projData, goals]) => ({ goals, projData })),
     tap((data) => {
       this.managementService.log('Data project -> goal', data);
+    }),
+    catchError((error) => {
+      this.managementService.error(error);
+      this.managementService.toastError('Problem loading data');
+      return of({});
     }),
     shareReplay(1),
   );
@@ -121,6 +132,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private fireService: FireService,
     private authService: AuthService,
     private managementService: ManagementService,
@@ -128,13 +140,14 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     private storageService: StorageService,
     private dataService: DataService,
     private apiService: ApiService,
-    private toastr: ToastrService,
+    private toastr: ToastrService, // FIXME: Start using it between management service
   ) { }
 
   ngOnInit(): void {
     this.projectObs.pipe(
       takeUntil(this.destroy$),
     ).subscribe((data) => {
+      if (Object.keys(data).length <= 0) return;
       this.project = data.projData;
       const rawGoals = data.goals as Goal[];
       this.goals = (data.projData.goals ?? []).reduce(function (filtered: Goal[], option: Goal) {

@@ -135,12 +135,12 @@ export class FireService {
 
           if (isDevMode()) {
             const bytes = sizeof(data);
-            this.managementService.log(`Reading col (col$) ${colRef.path}/${data['id']} - ${this.formatBytes(bytes)}`);
+            this.managementService.log(`Reading col (col$) ${col}/${data['id']} - ${this.formatBytes(bytes)}`);
           }
 
           return {
             ...data,
-            path: `${colRef.path}/${data['id']}`,
+            path: `${col}/${data['id']}`,
             exists: true,
           }
         })

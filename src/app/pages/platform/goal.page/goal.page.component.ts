@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { combineLatest, firstValueFrom, lastValueFrom, of, Subject } from 'rxjs';
-import { concatMap, distinctUntilChanged, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { catchError, concatMap, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Options } from 'sortablejs';
 import { Board } from 'src/app/models/board.model';
 import { Goal } from 'src/app/models/goal.model';
@@ -57,20 +57,32 @@ export class GoalPageComponent implements OnInit {
         this.fireService.col$(paths.boardsPath),
         this.fireService.doc$(paths.projectPath).pipe(
           concatMap((projectData) => {
-            return this.apiService.getUserInfo(projectData.owner.id).pipe(
+            return projectData.exists ? this.apiService.getUserInfo(projectData.owner.id).pipe(
               map((ownerData) => {
                 return { ...projectData, owner: ownerData };
               }),
               take(1),
-            )
+            ) : of(projectData);
           }),
         ),
       ]).pipe(
+        tap(([goal, boards, project]) => {
+          const toAnalize = [goal, project];
+          if (toAnalize.some((data: any) => !data.exists)) {
+            this.router.navigateByUrl('/platform');
+            throw new Error('Reading unexisting data');
+          }
+        }),
         map(([goal, boards, project]) => ({ goal, boards, project })),
       );
     }),
     tap((data) => {
       this.managementService.log('GoalPageComponent', 'projectObs', data);
+    }),
+    catchError((err) => {
+      this.managementService.error(err);
+      this.managementService.toastError('Problem loading data');
+      return of(null);
     }),
     shareReplay(1),
   );
@@ -116,12 +128,14 @@ export class GoalPageComponent implements OnInit {
     private authService: AuthService,
     private managementService: ManagementService,
     private apiService: ApiService,
+    private router: Router,
   ) { }
 
   ngOnInit(): void {
     this.projectObs$.pipe(
       takeUntil(this.destroy$),
     ).subscribe((data) => {
+      if (!data) return;
       this.project = data.project;
       this.goal = data.goal;
       this.boards = this.getBoards(data.goal, data.boards as Board[]);

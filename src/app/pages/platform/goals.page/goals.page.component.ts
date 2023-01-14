@@ -5,7 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { QuillConfig } from 'ngx-quill';
 import { ToastrService } from 'ngx-toastr';
 import { concatMap, distinctUntilKeyChanged, map, shareReplay, switchMap, take, tap, takeUntil, catchError } from 'rxjs/operators';
-import { combineLatest, lastValueFrom, Observable, of, Subject, throwError } from 'rxjs';
+import { combineLatest, lastValueFrom, Observable, of, Subject } from 'rxjs';
 import { Options } from 'sortablejs';
 import { Goal } from 'src/app/models/goal.model';
 import { Project } from 'src/app/models/project.model';
@@ -52,7 +52,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       this.fireService.doc$(paths.projectPath).pipe(
         tap((projData) => {
           if (!projData.exists) {
-            this.router.navigate(['..']);
+            this.router.navigateByUrl('/platform');
             throw new Error('The project does not exists');
           };
         }),
@@ -75,7 +75,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     catchError((error) => {
       this.managementService.error(error);
       this.managementService.toastError('Problem loading data');
-      return of({});
+      return of(null);
     }),
     shareReplay(1),
   );
@@ -147,7 +147,7 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
     this.projectObs.pipe(
       takeUntil(this.destroy$),
     ).subscribe((data) => {
-      if (Object.keys(data).length <= 0) return;
+      if (!data) return;
       this.project = data.projData;
       const rawGoals = data.goals as Goal[];
       this.goals = (data.projData.goals ?? []).reduce(function (filtered: Goal[], option: Goal) {

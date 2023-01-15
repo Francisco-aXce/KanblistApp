@@ -105,11 +105,6 @@ export class ApiService {
         tap({
           complete: () => this.toastr.success('Board saved correctly', 'Success'),
         }),
-        catchError((error) => {
-          this.toastr.error('Error while saving board', 'Error');
-          this.managementService.error(error);
-          return of(null);
-        }),
       );
   }
 

@@ -2,15 +2,14 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { combineLatest, firstValueFrom, lastValueFrom, of, Subject } from 'rxjs';
-import { catchError, concatMap, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { combineLatest, lastValueFrom, of, Subject } from 'rxjs';
+import { catchError, concatMap, distinctUntilChanged, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Options } from 'sortablejs';
 import { Board } from 'src/app/models/board.model';
 import { Goal } from 'src/app/models/goal.model';
 import { Project } from 'src/app/models/project.model';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { DataService } from 'src/app/services/data.service';
 import { FireService } from 'src/app/services/fire.service';
 import { ManagementService } from 'src/app/services/management.service';
 
@@ -200,6 +199,11 @@ export class GoalPageComponent implements OnInit {
       await lastValueFrom(this.apiService.createBoard(this.project, this.goal, finalData))
         .then(() => {
           this.modalService.dismissAll();
+        })
+        .catch((err) => {
+          this.managementService.error(err);
+          const userMessage = err?.error?.success !== undefined ? err.error?.message : 'Problem creating board';
+          this.managementService.toastError(userMessage);
         });
     }
 

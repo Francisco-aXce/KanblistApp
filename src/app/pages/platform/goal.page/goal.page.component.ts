@@ -244,7 +244,6 @@ export class GoalPageComponent implements OnInit {
       await lastValueFrom(this.apiService.editTask(this.project, this.goal, this.boardToEdit, this.taskToEdit, finalData))
         .then(() => {
           this.modalService.dismissAll();
-          this.boardToEdit = undefined;
           this.taskToEdit = undefined;
           this.editMode = false;
         });
@@ -252,10 +251,15 @@ export class GoalPageComponent implements OnInit {
       await lastValueFrom(this.apiService.createTask(this.project, this.goal, this.boardToEdit, finalData)).
         then(() => {
           this.modalService.dismissAll();
-          this.boardToEdit = undefined;
+        })
+        .catch((err) => {
+          this.managementService.error(err);
+          const userMessage = err?.error?.success !== undefined ? err.error?.message : 'Problem creating task';
+          this.managementService.toastError(userMessage);
         });
     }
 
+    this.boardToEdit = undefined;
     this.loadingSave = false;
 
   }

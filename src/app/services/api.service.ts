@@ -150,11 +150,6 @@ export class ApiService {
         tap({
           complete: () => this.toastr.success('Task saved correctly', 'Success'),
         }),
-        catchError((error) => {
-          this.toastr.error('Error while saving task', 'Error');
-          this.managementService.error(error);
-          return of(null);
-        }),
       );
   }
 

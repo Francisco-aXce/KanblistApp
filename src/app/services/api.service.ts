@@ -118,7 +118,7 @@ export class ApiService {
       boardId: board.id,
       boardData,
     };
-    return this.http.post(this.baseUrlBoards + '/edit', body, { responseType: 'json' })
+    return this.http.patch(this.baseUrlBoards + '/edit', body, { responseType: 'json' })
       .pipe(
         tap({
           complete: () => this.toastr.success('Board saved correctly', 'Success'),
@@ -164,7 +164,7 @@ export class ApiService {
       taskId: task.id,
       taskData,
     };
-    return this.http.post(this.baseUrltasks + '/edit', body, { responseType: 'json' })
+    return this.http.patch(this.baseUrltasks + '/edit', body, { responseType: 'json' })
       .pipe(
         tap({
           complete: () => this.toastr.success('Task saved correctly', 'Success'),

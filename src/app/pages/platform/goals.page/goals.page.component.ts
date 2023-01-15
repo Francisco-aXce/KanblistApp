@@ -176,8 +176,8 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
 
   async saveGoal() {
     this.goalForm.markAllAsTouched();
-    this.loadingSave = true;
     if (this.goalForm.invalid || this.loadingPreview) return;
+    this.loadingSave = true;
 
     const goalData = {
       name: this.name.value,
@@ -189,8 +189,13 @@ export class GoalsPageComponent implements OnInit, OnDestroy {
       .then(() => {
         this.modalService.dismissAll();
         this.goalForm.reset();
-        this.loadingSave = false;
+      })
+      .catch((err) => {
+        this.managementService.error(err);
+        const userMessage = err?.error?.success !== undefined ? err?.error?.message : 'Problem creating goal';
+        this.managementService.toastError(userMessage);
       });
+    this.loadingSave = false;
   }
 
   async editProject() {

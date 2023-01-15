@@ -84,11 +84,6 @@ export class ApiService {
         tap({
           complete: () => this.toastr.success('Goal saved correctly', 'Success'),
         }),
-        catchError((error) => {
-          this.toastr.error('Error while saving goal', 'Error');
-          this.managementService.error(error);
-          return of(null);
-        }),
       );
   }
 

@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "kanb-list"
-  }
+  },
+  "targets": {
+    "kanb-list": {
+      "hosting": {
+        "prod": [
+          "kanb"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

@@ -54,6 +54,14 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
   readonly previewPCallback = (project: any) => {
     this.projectToPreview = project;
     this.modalService.open(this.modalProjectPreview, { centered: true, size: 'xl' });
+
+    lastValueFrom(this.apiService.getUserInfo(project.owner.id))
+      .then((user) => user && (project.owner = user));
+
+    this.dataService.getProjectDesc(project.owner.id, project.id)
+      .then((desc) => {
+        project.description = desc;
+      });
   };
 
   readonly projectForm = new UntypedFormGroup({

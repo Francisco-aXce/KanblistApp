@@ -55,9 +55,11 @@ export class AuthService {
 
   async loginWithGoogle() {
     try {
-      await signInWithPopup(this.auth, new GoogleAuthProvider())
-        .then((user) => this.managementService.log('user: ', user));
-      this.router.navigateByUrl(Constants.DEFAULT_REDIRECT_LOGIN);
+      const user = await signInWithPopup(this.auth, new GoogleAuthProvider());
+      this.managementService.log('user: ', user)
+      // FIXME: Temp workaround for updating token, it should just redirect
+      window.location.reload();
+      // this.router.navigateByUrl(Constants.DEFAULT_REDIRECT_LOGIN);
       this.toastrService.success('Logged in successfully!');
     } catch (error) {
       this.toastrService.error('Please try again', 'Login error');

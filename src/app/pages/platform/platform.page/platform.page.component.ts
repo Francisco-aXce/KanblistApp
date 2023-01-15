@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { Observable, Subject, OperatorFunction, of, lastValueFrom, merge } from 'rxjs';
+import { Observable, Subject, OperatorFunction, lastValueFrom, merge } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, filter, map, shareReplay, switchMap, takeUntil } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -130,8 +130,13 @@ export class PlatformPageComponent implements OnInit, OnDestroy {
       .then(() => {
         this.modalService.dismissAll();
         this.projectForm.reset();
-        this.loadingSave = false;
+      })
+      .catch((err) => {
+        this.managementService.error('Error while creating project', err);
+        const userMessage = err?.error?.success !== undefined ? err.error.message : 'Error while creating project';
+        this.managementService.toastError(userMessage);
       });
+    this.loadingSave = false;
   }
 
 }

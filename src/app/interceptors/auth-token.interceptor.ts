@@ -19,7 +19,6 @@ export class AuthTokenInterceptor implements HttpInterceptor {
         ? next.handle(request.clone({ headers: request.headers.set('Authorization', `Bearer ${token}`) }))
         : next.handle(request)
       ),
-      catchError(() => next.handle(request)),
     );
   }
 }

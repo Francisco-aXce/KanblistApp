@@ -44,11 +44,6 @@ export class ApiService {
         tap({
           complete: () => this.toastr.success(successMessage, 'Success'),
         }),
-        catchError((error) => {
-          this.toastr.error(errorMessage, 'Error');
-          this.managementService.error(error);
-          return of(null);
-        }),
       );
   }
 
